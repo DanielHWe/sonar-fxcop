@@ -38,17 +38,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.sonarsource.fxcop</groupId>
-      <artifactId>sonar-fxcop-library</artifactId>
-      <version>1.5</version>
-    </dependency>
-    <!--  Needed by the FxCop library. Used to be provided by the platform but no more the case. -->
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
-    </dependency>
-    <dependency>
       <groupId>org.sonarsource.sslr-squid-bridge</groupId>
       <artifactId>sslr-squid-bridge</artifactId>
       <version>2.6.1</version>
@@ -155,7 +144,7 @@
         <extensions>true</extensions>
         <configuration>
           <pluginName>FxCop</pluginName>
-          <pluginDescription><![CDATA[Analyze C#/VB.NET code with FxCop or import FxCop reports generated during your build]]></pluginDescription>
+          <pluginDescription><![CDATA[Import FxCop reports generated during your build to SonarQube issues]]></pluginDescription>
           <pluginClass>org.sonar.plugins.fxcop.FxCopPlugin</pluginClass>
         </configuration>
       </plugin>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FxCopReport Version="12.0">
+ <Targets>
+  <Target Name="C:\Users\SonarSource\Documents\Visual Studio 2013\Projects\CSharpPlayground\MyLibrary\bin\Debug\MyLibrary.dll">
+   <Modules>
+    <Module Name="mylibrary.dll">
+     <Messages>
+      <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Status="Active" Created="2014-02-26 00:22:14Z" FixCategory="NonBreaking" BreaksBuild="True">
+       <Issue Name="NoStrongName" Certainty="95" Level="CriticalError" Line="foo">Sign 'MyLibrary.dll' with a strong name key.</Issue>
+      </Message>
+     </Messages>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+</FxCopReport>

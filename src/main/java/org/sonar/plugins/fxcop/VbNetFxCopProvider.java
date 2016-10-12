@@ -8,13 +8,8 @@ package org.sonar.plugins.fxcop;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.sonar.api.PropertyType;
-import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.component.ResourcePerspectives;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.Settings;
-import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.resources.Qualifiers;
-import org.sonar.api.server.rule.RulesDefinition;
 import org.sonar.squidbridge.rules.SqaleXmlLoader;
 
 public class VbNetFxCopProvider {
@@ -112,22 +107,15 @@ public class VbNetFxCopProvider {
   public static class VbNetFxCopRulesDefinition extends FxCopRulesDefinition {
 
     public VbNetFxCopRulesDefinition() {
-      super(FXCOP_CONF, new VbNetFxCopRulesDefinitionSqaleLoader());
-    }
-
-    private static class VbNetFxCopRulesDefinitionSqaleLoader implements FxCopRulesDefinition.FxCopRulesDefinitionSqaleLoader {
-      @Override
-      public void loadSqale(RulesDefinition.NewRepository repository) {
-        SqaleXmlLoader.load(repository, "/com/sonar/sqale/fxcop-vbnet.xml");
-      }
+      super(FXCOP_CONF, repo -> SqaleXmlLoader.load(repo, "/com/sonar/sqale/fxcop-vbnet.xml"));
     }
 
   }
 
   public static class VbNetFxCopSensor extends FxCopSensor {
 
-    public VbNetFxCopSensor(Settings settings, RulesProfile profile, FileSystem fileSystem, ResourcePerspectives perspectives) {
-      super(FXCOP_CONF, settings, profile, fileSystem, perspectives);
+    public VbNetFxCopSensor() {
+      super(FXCOP_CONF);
     }
 
   }

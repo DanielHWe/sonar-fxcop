@@ -22,11 +22,7 @@ package org.sonar.plugins.fxcop;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.sonar.api.PropertyType;
-import org.sonar.api.batch.fs.FileSystem;
-import org.sonar.api.component.ResourcePerspectives;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.config.Settings;
-import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.resources.Qualifiers;
 import org.sonar.squidbridge.rules.SqaleXmlLoader;
 
@@ -125,22 +121,15 @@ public class CSharpFxCopProvider {
   public static class CSharpFxCopRulesDefinition extends FxCopRulesDefinition {
 
     public CSharpFxCopRulesDefinition() {
-      super(
-        FXCOP_CONF,
-        new FxCopRulesDefinitionSqaleLoader() {
-          @Override
-          public void loadSqale(NewRepository repository) {
-            SqaleXmlLoader.load(repository, "/com/sonar/sqale/fxcop-cs.xml");
-          }
-        });
+      super(FXCOP_CONF, repo -> SqaleXmlLoader.load(repo, "/com/sonar/sqale/fxcop-cs.xml"));
     }
 
   }
 
   public static class CSharpFxCopSensor extends FxCopSensor {
 
-    public CSharpFxCopSensor(Settings settings, RulesProfile profile, FileSystem fs, ResourcePerspectives perspectives) {
-      super(FXCOP_CONF, settings, profile, fs, perspectives);
+    public CSharpFxCopSensor() {
+      super(FXCOP_CONF);
     }
 
   }
