@@ -20,18 +20,17 @@
 package org.sonar.plugins.fxcop;
 
 import com.google.common.base.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.sonar.api.utils.command.Command;
-import org.sonar.api.utils.command.CommandExecutor;
-
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.sonar.api.utils.command.Command;
+import org.sonar.api.utils.command.CommandExecutor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class FxCopExecutor {
 
-  private static final Logger LOG = LoggerFactory.getLogger(FxCopExecutor.class);
+  private static final Logger LOG = Loggers.get(FxCopExecutor.class);
   private static final String EXECUTABLE = "FxCopCmd.exe";
 
   public void execute(String executable, String assemblies, File rulesetFile, File reportFile, int timeout, boolean aspnet, List<String> directories, List<String> references) {

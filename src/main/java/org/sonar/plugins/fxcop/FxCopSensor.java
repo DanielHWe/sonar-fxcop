@@ -26,8 +26,6 @@ import java.io.File;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -39,12 +37,14 @@ import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.config.Settings;
 import org.sonar.api.rule.RuleKey;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class FxCopSensor implements Sensor {
 
   private static final String CUSTOM_RULE_KEY = "CustomRuleTemplate";
   private static final String CUSTOM_RULE_CHECK_ID_PARAMETER = "CheckId";
-  private static final Logger LOG = LoggerFactory.getLogger(FxCopSensor.class);
+  private static final Logger LOG = Loggers.get(FxCopSensor.class);
 
   private final FxCopConfiguration fxCopConf;
 
