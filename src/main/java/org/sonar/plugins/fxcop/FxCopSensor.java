@@ -96,6 +96,10 @@ public class FxCopSensor implements Sensor {
       InputFile inputFile = null;
       if (absolutePath != null) {
         inputFile = context.fileSystem().inputFile(context.fileSystem().predicates().hasAbsolutePath(absolutePath));
+        if (inputFile == null && (absolutePath.endsWith(".cs") || absolutePath.endsWith(".vb"))) {
+          LOG.debug("Ignoring issue on file '{}' that is not indexed and was probably excluded", absolutePath);
+          continue;
+        }
       }
 
       NewIssue newIssue = context.newIssue()
