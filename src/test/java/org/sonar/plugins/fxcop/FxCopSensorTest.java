@@ -119,7 +119,10 @@ public class FxCopSensorTest {
         new FxCopIssue(100, "CA0000", null, "Class1.cs", 1, "Dummy message"), // no path -> project
         new FxCopIssue(200, "CA0000", baseDir.toString(), null, 2, "Dummy message 2"), // no filename -> project
         new FxCopIssue(300, "CA0000", baseDir.toString(), "Class3.cs", null, "Dummy message"), // no line -> on file
-        new FxCopIssue(400, "CA0000", baseDir.toString(), "Class4.cs", 4, "First message"), // no input file -> on project
+        // no input file but not a source file -> on project
+        new FxCopIssue(400, "CA0000", baseDir.toString(), "Class4.dll", 4, "First message"),
+        // no input file but is a source file -> skipped
+        new FxCopIssue(400, "CA0000", baseDir.toString(), "Class4.cs", 4, "First message 2"),
         new FxCopIssue(500, "CA0000", baseDir.toString(), "Class5.cs", 0, "Second message"), // all good but line 0 -> on file
         new FxCopIssue(600, "CA1000", baseDir.toString(), "Class6.cs", 6, "Third message"), // all good -> on file+line
         new FxCopIssue(700, "CA0000", baseDir.toString(), "Class7.cs", 7, "Fourth message"), // language "bar" -> on file+line
@@ -137,7 +140,7 @@ public class FxCopSensorTest {
         tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, "Dummy message"),
         tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, "Dummy message 2"),
         tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class3.cs", null, "Dummy message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, baseDir.resolve("Class4.cs").toString() + " line 4: First message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, baseDir.resolve("Class4.dll").toString() + " line 4: First message"),
         tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class5.cs", null, "Second message"),
         tuple(RuleKey.of("foo-fxcop", "_CA1000"), "Class6.cs", 6, "Third message"),
         tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class7.cs", 7, "Fourth message"),
