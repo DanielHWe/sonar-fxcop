@@ -115,6 +115,7 @@ public class FxCopSensor implements Sensor {
         newIssue.at(location);
       } else {
         NewIssueLocation location = newIssue.newLocation()
+          .on(context.module())
           .message(createMessageLocation(absolutePath, issue.line()) + issue.message());
         newIssue.at(location);
       }

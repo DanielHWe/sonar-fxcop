@@ -135,16 +135,16 @@ public class FxCopSensorTest {
       ImmutableList.of("c:/", "d:/"), ImmutableList.<String>of());
 
     assertThat(context.allIssues())
-      .extracting("ruleKey", "primaryLocation.component.relativePath", "primaryLocation.textRange.start.line", "primaryLocation.message")
+      .extracting("ruleKey", "primaryLocation.component", "primaryLocation.textRange.start.line", "primaryLocation.message")
       .containsOnly(
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, "Dummy message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, "Dummy message 2"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class3.cs", null, "Dummy message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), null, null, baseDir.resolve("Class4.dll").toString() + " line 4: First message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class5.cs", null, "Second message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA1000"), "Class6.cs", 6, "Third message"),
-        tuple(RuleKey.of("foo-fxcop", "_CA0000"), "Class7.cs", 7, "Fourth message"),
-        tuple(RuleKey.of("foo-fxcop", "CustomRuleTemplate_42"), "Class8.cs", 8, "Fifth message"));
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), context.module(), null, "Dummy message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), context.module(), null, "Dummy message 2"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), class3InputFile, null, "Dummy message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), context.module(), null, baseDir.resolve("Class4.dll").toString() + " line 4: First message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), class5InputFile, null, "Second message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA1000"), class6InputFile, 6, "Third message"),
+        tuple(RuleKey.of("foo-fxcop", "_CA0000"), class7InputFile, 7, "Fourth message"),
+        tuple(RuleKey.of("foo-fxcop", "CustomRuleTemplate_42"), class8InputFile, 8, "Fifth message"));
 
   }
 
