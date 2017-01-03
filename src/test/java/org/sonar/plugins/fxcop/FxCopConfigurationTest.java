@@ -60,6 +60,33 @@ public class FxCopConfigurationTest {
     assertThat(fxCopConf.referencesPropertyKey()).isEqualTo("barReferencesKey");
     assertThat(fxCopConf.reportPathPropertyKey()).isEqualTo("barReportPathKey");
   }
+  
+  @Test
+  public void testWildCard() {
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "foo/AssemblyKey*", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
+      "fooReferencesKey", "fooReportPathKey");
+    assertThat(fxCopConf.languageKey()).isEqualTo("cs");
+    assertThat(fxCopConf.repositoryKey()).isEqualTo("cs-fxcop");
+    assertThat(fxCopConf.assemblyPropertyKey()).isEqualTo("foo/AssemblyKey*");
+    assertThat(fxCopConf.fxCopCmdPropertyKey()).isEqualTo("fooFxCopCmdPathKey");
+    assertThat(fxCopConf.timeoutPropertyKey()).isEqualTo("fooTimeoutKey");
+    assertThat(fxCopConf.aspnetPropertyKey()).isEqualTo("fooAspnetKey");
+    assertThat(fxCopConf.directoriesPropertyKey()).isEqualTo("fooDirectoriesKey");
+    assertThat(fxCopConf.referencesPropertyKey()).isEqualTo("fooReferencesKey");
+    assertThat(fxCopConf.reportPathPropertyKey()).isEqualTo("fooReportPathKey");
+
+    fxCopConf = new FxCopConfiguration("vbnet", "vbnet-fxcop", "bar/AssemblyKey*", "barFxCopCmdPathKey", "barTimeoutKey", "barAspnetKey", "barDirectoriesKey",
+      "barReferencesKey", "barReportPathKey");
+    assertThat(fxCopConf.languageKey()).isEqualTo("vbnet");
+    assertThat(fxCopConf.repositoryKey()).isEqualTo("vbnet-fxcop");
+    assertThat(fxCopConf.assemblyPropertyKey()).isEqualTo("bar/AssemblyKey*");
+    assertThat(fxCopConf.fxCopCmdPropertyKey()).isEqualTo("barFxCopCmdPathKey");
+    assertThat(fxCopConf.timeoutPropertyKey()).isEqualTo("barTimeoutKey");
+    assertThat(fxCopConf.aspnetPropertyKey()).isEqualTo("barAspnetKey");
+    assertThat(fxCopConf.directoriesPropertyKey()).isEqualTo("barDirectoriesKey");
+    assertThat(fxCopConf.referencesPropertyKey()).isEqualTo("barReferencesKey");
+    assertThat(fxCopConf.reportPathPropertyKey()).isEqualTo("barReportPathKey");
+  }
 
   @Test
   public void check_properties() {
