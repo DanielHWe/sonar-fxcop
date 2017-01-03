@@ -21,12 +21,21 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.base.Preconditions;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.sonar.api.config.Settings;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class FxCopConfiguration {
 
   private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
   private static final String DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY = "sonar.fxcop.timeoutMinutes";
+  private static final Logger LOG = Loggers.get(FxCopExecutor.class);
 
   private final String languageKey;
   private final String repositoryKey;
@@ -37,6 +46,7 @@ public class FxCopConfiguration {
   private final String directoriesPropertyKey;
   private final String referencesPropertyKey;
   private final String reportPathPropertyKey;
+private int _assemblyCount;
 
   public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
     String directoriesPropertyKey, String referencesPropertyKey,
@@ -110,7 +120,47 @@ public class FxCopConfiguration {
   private void checkAssemblyProperty(Settings settings) {
     String assemblyPath = settings.getString(assemblyPropertyKey);
 
-    File assemblyFile = new File(assemblyPath);
+    if (assemblyPath.contains("*")) {
+    	checkWildcardAssemblyPath(assemblyPath);
+    } else {
+        checkSingleAssemblyPath(assemblyPath);
+    }
+  }
+
+  private void checkWildcardAssemblyPath(String assemblyPath) {
+	  int lastSlash = assemblyPath.lastIndexOf('/');
+	  String folderPath = lastSlash > 0 ?  assemblyPath.substring(0, lastSlash) : "./";
+	  String fileName = lastSlash > 0 ?  assemblyPath.substring(lastSlash+1) : assemblyPath;
+		
+	  _assemblyCount = 0;
+	  try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(
+	    Paths.get(folderPath), fileName)) {			
+	    dirStream.forEach(path -> {
+	      if (path.toString().endsWith(".dll") || path.toString().endsWith(".exe")) {
+	    	LOG.debug("Check assembly: '" + path + "'.");
+	    	File pdbFile = new File(pdbPath(path.toString()));
+	    	if (pdbFile.isFile()) {
+	          _assemblyCount++;
+	    	}  else {
+	    		LOG.debug("Ignore file: '" + path + "' no pdb.");
+	    	}
+	      } else {
+	    	  LOG.debug("Ignore file: '" + path + "' no assembly.");
+	      }
+	    });
+	  } catch (IOException e) {
+		  LOG.error("Error during search assemblys", e);
+	    Preconditions.checkArgument(
+	    		      false,
+	    		      "Cannot find any assembly matching \"" + assemblyPath + "\" provided by the property \"" + assemblyPropertyKey + "\". Error: " + e.getMessage());
+	  }
+	  Preconditions.checkArgument(
+  		      _assemblyCount>0,
+  		      "Cannot find any assembly matching \"" + fileName + "\" in folder \""+folderPath+"\" provided by the property \"" + assemblyPropertyKey + "\".");
+  }
+  
+  private void checkSingleAssemblyPath(String assemblyPath) {
+	File assemblyFile = new File(assemblyPath);
     Preconditions.checkArgument(
       assemblyFile.isFile(),
       "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
@@ -119,6 +169,7 @@ public class FxCopConfiguration {
     Preconditions.checkArgument(
       pdbFile.isFile(),
       "Cannot find the .pdb file \"" + pdbFile.getAbsolutePath() + "\" inferred from the property \"" + assemblyPropertyKey + "\".");
+
   }
 
   private static String pdbPath(String assemblyPath) {
