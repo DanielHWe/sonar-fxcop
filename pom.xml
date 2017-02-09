@@ -11,10 +11,6 @@
   <description>Enables scanning of C#/VB.NET source files with FxCop</description>
   <url>https://github.com/SonarQubeCommunity/sonar-fxcop</url>
   <inceptionYear>2016</inceptionYear>
-  <organization>
-    <name>SonarSource</name>
-    <url>http://www.sonarsource.com</url>
-  </organization>
   <licenses>
     <license>
       <name>GNU LGPL 3</name>
