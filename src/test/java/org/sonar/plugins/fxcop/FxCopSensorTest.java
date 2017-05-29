@@ -21,7 +21,6 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,7 +34,6 @@ import org.sonar.api.rule.RuleKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -173,15 +171,6 @@ public class FxCopSensorTest {
       anyString(), anyString(), any(File.class), any(File.class), anyInt(), anyBoolean(), anyListOf(String.class), anyListOf(String.class));
 
     verify(parser).parse(new File(reportFile.getAbsolutePath()));
-  }
-
-  @Test
-  public void check_properties() throws IOException {
-    assumeTrue(System.getProperty("os.name").startsWith("Windows"));
-    thrown.expectMessage("No FxCop analysis has been performed on this project");
-
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "");
-    new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
   }
 
 }
