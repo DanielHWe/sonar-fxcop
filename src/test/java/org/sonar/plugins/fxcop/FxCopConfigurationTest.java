@@ -86,7 +86,17 @@ public class FxCopConfigurationTest {
   }
 
   @Test
-  public void check_properties_assembly_property_not_not_found() {
+  public void check_properties_should_return_false_when_assembly_property_not_found() {
+    Settings settings = mock(Settings.class);
+    String assemblyProperty = "fooAssemblyKey";
+    when(settings.hasKey(assemblyProperty)).thenReturn(false);
+
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings)).isFalse();
+  }
+
+  @Test
+  public void check_properties_assembly_not_found() {
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Cannot find the assembly");
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/MyLibraryNotFound.dll").getAbsolutePath());
