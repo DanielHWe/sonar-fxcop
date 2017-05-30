@@ -88,23 +88,18 @@ public class FxCopConfiguration {
     return reportPathPropertyKey;
   }
 
-  public void checkProperties(Settings settings) {
+  public boolean checkProperties(Settings settings) {
     if (settings.hasKey(reportPathPropertyKey)) {
       checkReportPathProperty(settings);
     } else {
-      checkMandatoryProperties(settings);
+      if (!settings.hasKey(assemblyPropertyKey)) {
+        return false;
+      }
       checkAssemblyProperty(settings);
       checkFxCopCmdPathProperty(settings);
       checkTimeoutProeprty(settings);
     }
-  }
-
-  private void checkMandatoryProperties(Settings settings) {
-    if (!settings.hasKey(assemblyPropertyKey)) {
-      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
-        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
-        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");
-    }
+    return true;
   }
 
   private void checkAssemblyProperty(Settings settings) {
