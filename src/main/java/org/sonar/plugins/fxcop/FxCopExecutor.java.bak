@@ -33,13 +33,9 @@ public class FxCopExecutor {
   private static final Logger LOG = Loggers.get(FxCopExecutor.class);
   private static final String EXECUTABLE = "FxCopCmd.exe";
 
-  public void execute(String executable, String targetFile, File rulesetFile, File reportFile, int timeout, boolean aspnet, List<String> directories, List<String> references) {
-	String targetFileArgument = "/file:" + targetFile;
-	if (targetFile.endsWith(".fxcop")) {
-	   targetFileArgument = "/project:" +targetFile;
-	}
+  public void execute(String executable, String assemblies, File rulesetFile, File reportFile, int timeout, boolean aspnet, List<String> directories, List<String> references) {
     Command command = Command.create(getExecutable(executable))
-      .addArgument(targetFileArgument)
+      .addArgument("/file:" + assemblies)
       .addArgument("/ruleset:=" + rulesetFile.getAbsolutePath())
       .addArgument("/out:" + reportFile.getAbsolutePath())
       .addArgument("/outxsl:none")

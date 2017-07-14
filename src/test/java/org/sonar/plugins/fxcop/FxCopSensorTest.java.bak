@@ -57,7 +57,7 @@ public class FxCopSensorTest {
   @Test
   public void testDescriptor() {
     DefaultSensorDescriptor descriptor = new DefaultSensorDescriptor();
-    new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "")).describe(descriptor);
+    new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "")).describe(descriptor);
     assertThat(descriptor.name()).isEqualTo("FxCop (foo)");
   }
 
@@ -128,7 +128,7 @@ public class FxCopSensorTest {
         new FxCopIssue(700, "CA0000", baseDir.toString(), "Class7.cs", 7, "Fourth message"), // language "bar" -> on file+line
         new FxCopIssue(800, "CR1000", baseDir.toString(), "Class8.cs", 8, "Fifth message"))); // all good -> on file+line
 
-    sensor.analyse(writer, parser, executor, context); 
+    sensor.analyse(writer, parser, executor, context);
 
     verify(writer).write(ImmutableList.of("CA0000", "CA1000", "CR1000"), new File(workingDir, "fxcop-sonarqube.ruleset"));
     verify(executor).execute("FxCopCmd.exe", "MyLibrary.dll", new File(workingDir, "fxcop-sonarqube.ruleset"), new File(workingDir, "fxcop-report.xml"), 42, true,
@@ -180,16 +180,8 @@ public class FxCopSensorTest {
     assumeTrue(System.getProperty("os.name").startsWith("Windows"));
     thrown.expectMessage("No FxCop analysis has been performed on this project");
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "");
     new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
   }
 
-  @Test
-  public void check_properties2() throws IOException {
-    assumeTrue(System.getProperty("os.name").startsWith("Windows"));
-    thrown.expectMessage("No FxCop analysis has been performed on this project");
-
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectFileKey", "", "", "", "", "", "");
-    new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
-  }
 }

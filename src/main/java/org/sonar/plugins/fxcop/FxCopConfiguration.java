@@ -40,6 +40,7 @@ public class FxCopConfiguration {
   private final String languageKey;
   private final String repositoryKey;
   private final String assemblyPropertyKey;
+  private final String projectFilePropertyKey;
   private String fxCopCmdPropertyKey;
   private String timeoutPropertyKey;
   private final String aspnetPropertyKey;
@@ -48,19 +49,20 @@ public class FxCopConfiguration {
   private final String reportPathPropertyKey;
 private int _assemblyCount;
 
-  public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
-    String directoriesPropertyKey, String referencesPropertyKey,
-    String reportPathPropertyKey) {
-    this.languageKey = languageKey;
-    this.repositoryKey = repositoryKey;
-    this.assemblyPropertyKey = assemblyPropertyKey;
-    this.fxCopCmdPropertyKey = fxCopCmdPropertyKey;
-    this.timeoutPropertyKey = timeoutPropertyKey;
-    this.aspnetPropertyKey = aspnetPropertyKey;
-    this.directoriesPropertyKey = directoriesPropertyKey;
-    this.referencesPropertyKey = referencesPropertyKey;
-    this.reportPathPropertyKey = reportPathPropertyKey;
-  }
+public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String projectFilePropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
+	    String directoriesPropertyKey, String referencesPropertyKey,
+	    String reportPathPropertyKey) {
+	    this.languageKey = languageKey;
+	    this.repositoryKey = repositoryKey;
+	    this.assemblyPropertyKey = assemblyPropertyKey;
+	    this.projectFilePropertyKey = projectFilePropertyKey;
+	    this.fxCopCmdPropertyKey = fxCopCmdPropertyKey;
+	    this.timeoutPropertyKey = timeoutPropertyKey;
+	    this.aspnetPropertyKey = aspnetPropertyKey;
+	    this.directoriesPropertyKey = directoriesPropertyKey;
+	    this.referencesPropertyKey = referencesPropertyKey;
+	    this.reportPathPropertyKey = reportPathPropertyKey;
+	  }
 
   public String languageKey() {
     return languageKey;
@@ -73,6 +75,10 @@ private int _assemblyCount;
   public String assemblyPropertyKey() {
     return assemblyPropertyKey;
   }
+  
+  public String projectFilePropertyKey() {
+	    return projectFilePropertyKey;
+	  }
 
   public String fxCopCmdPropertyKey() {
     return fxCopCmdPropertyKey;
@@ -99,23 +105,24 @@ private int _assemblyCount;
   }
 
   public void checkProperties(Settings settings) {
-    if (settings.hasKey(reportPathPropertyKey)) {
-      checkReportPathProperty(settings);
-    } else {
-      checkMandatoryProperties(settings);
-      checkAssemblyProperty(settings);
-      checkFxCopCmdPathProperty(settings);
-      checkTimeoutProeprty(settings);
-    }
-  }
-
+	    if (settings.hasKey(reportPathPropertyKey)) {
+	      checkReportPathProperty(settings);
+	    } else {
+	      checkMandatoryProperties(settings);
+	      checkAssemblyProperty(settings);
+	      checkProjectFileProperty(settings);
+	      checkFxCopCmdPathProperty(settings);
+	      checkTimeoutProeprty(settings);
+	    }
+	  }
+  
   private void checkMandatoryProperties(Settings settings) {
-    if (!settings.hasKey(assemblyPropertyKey)) {
-      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
-        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
-        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");
-    }
-  }
+	    if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) {
+	      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
+	        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
+	        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");
+	    }
+	  }
 
   private void checkAssemblyProperty(Settings settings) {
     String assemblyPath = settings.getString(assemblyPropertyKey);
@@ -206,5 +213,17 @@ private int _assemblyCount;
       file.isFile(),
       "Cannot find the FxCop report \"" + file.getAbsolutePath() + "\" provided by the property \"" + reportPathPropertyKey + "\".");
   }
+  
+  private void checkProjectFileProperty(Settings settings) {
+		if (!settings.hasKey(projectFilePropertyKey)) return;
+	    String projectFilePath = settings.getString(projectFilePropertyKey);
+
+	    File assemblyFile = new File(projectFilePath);
+	    Preconditions.checkArgument(
+	      assemblyFile.isFile(),
+	      "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
+
+	    
+	  }
 
 }
