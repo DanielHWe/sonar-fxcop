@@ -23,6 +23,7 @@ public class VbNetFxCopProvider {
     "moving to the MSBuild Runner should be scheduled because one day the backward support of the Visual Studio Boostrapper plugin will be dropped.";
 
   private static final String FXCOP_ASSEMBLIES_PROPERTY_KEY = "sonar.vbnet.fxcop.assembly";
+  private static final String FXCOP_PROJECT_PROPERTY_KEY = "sonar.vbnet.fxcop.project";
   private static final String FXCOP_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.vbnet.fxcop.fxCopCmdPath";
   private static final String FXCOP_TIMEOUT_PROPERTY_KEY = "sonar.vbnet.fxcop.timeoutMinutes";
   private static final String FXCOP_ASPNET_PROPERTY_KEY = "sonar.vbnet.fxcop.aspnet";
@@ -34,6 +35,7 @@ public class VbNetFxCopProvider {
     LANGUAGE_KEY,
     "fxcop-vbnet",
     FXCOP_ASSEMBLIES_PROPERTY_KEY,
+    FXCOP_PROJECT_PROPERTY_KEY,
     FXCOP_FXCOPCMD_PATH_PROPERTY_KEY,
     FXCOP_TIMEOUT_PROPERTY_KEY,
     FXCOP_ASPNET_PROPERTY_KEY,
