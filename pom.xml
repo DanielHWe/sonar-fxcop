@@ -5,16 +5,12 @@
   <groupId>org.sonarsource.dotnet</groupId>
   <artifactId>sonar-fxcop-plugin</artifactId>
   <packaging>sonar-plugin</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
 
   <name>SonarQube FxCop Plugin</name>
   <description>Enables scanning of C#/VB.NET source files with FxCop</description>
   <url>https://github.com/SonarQubeCommunity/sonar-fxcop</url>
   <inceptionYear>2016</inceptionYear>
-  <organization>
-    <name>SonarSource</name>
-    <url>http://www.sonarsource.com</url>
-  </organization>
   <licenses>
     <license>
       <name>GNU LGPL 3</name>

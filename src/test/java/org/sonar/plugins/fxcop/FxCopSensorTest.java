@@ -21,7 +21,6 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,13 +28,14 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.rule.RuleKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -192,4 +192,15 @@ public class FxCopSensorTest {
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectFileKey", "", "", "", "", "", "");
     new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
   }
+
+  public void should_skip_analysis_when_misconfigured() {
+    FxCopSensor sensor = new FxCopSensor(mock(FxCopConfiguration.class)) {
+      @Override
+      void analyse(FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, SensorContext context) {
+        fail("should not reach analyse step when misconfigured");
+      }
+    };
+    sensor.execute(mock(SensorContext.class));
+  }
+
 }

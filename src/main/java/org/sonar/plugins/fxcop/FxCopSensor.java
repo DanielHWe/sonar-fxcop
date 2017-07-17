@@ -66,7 +66,10 @@ public class FxCopSensor implements Sensor {
       LOG.debug("Skipping FxCop on non Windows OS");
       return;
     }
-    fxCopConf.checkProperties(context.settings());
+    if (!fxCopConf.checkProperties(context.settings())) {
+      LOG.warn("Skipping FxCop, either the report file or the assembly is missing");
+      return;
+    }
     analyse(new FxCopRulesetWriter(), new FxCopReportParser(), new FxCopExecutor(), context);
   }
 
