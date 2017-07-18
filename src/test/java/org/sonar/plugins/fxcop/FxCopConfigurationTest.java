@@ -112,31 +112,47 @@ public class FxCopConfigurationTest {
     new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
   }
 
+
+
   @Test
-  public void check_properties_assembly_property_not_set() {
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("No FxCop analysis has been performed on this project");
+  public void check_properties_should_return_false_when_assembly_property_not_found() {
 
     Settings settings = mock(Settings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(false);
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "").checkProperties(settings);
+    String assemblyProperty = "fooAssemblyKey";
+
+    when(settings.hasKey(assemblyProperty)).thenReturn(false);
+
+
+
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "");
+
+    assertThat(config.checkProperties(settings)).isFalse();
+
   }
 
   @Test
-  public void check_properties_assembly_property_not_not_found() {
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Cannot find the assembly");
-    thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/MyLibraryNotFound.dll").getAbsolutePath());
-    thrown.expectMessage("\"fooAssemblyKey\"");
-
+  public void check_properties_should_return_true_when_assembly_property_is_set() {
     Settings settings = mock(Settings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibraryNotFound.dll").getAbsolutePath());
+    String assemblyProperty = "fooAssemblyKey";
+    settings.setProperty("assemblyProperty", "fooAssemblyKey");
+    when(settings.hasKey(assemblyProperty)).thenReturn(false);
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "").checkProperties(settings);
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings)).isFalse();
   }
+  
+  @Test
+  public void check_properties_should_return_true_when_project_property_is_set() {
+    Settings settings = mock(Settings.class);
+    String projectProperty = "fooAssemblyKey";
+    settings.setProperty("projectFileProperty", "fooAssemblyKey");
+    when(settings.hasKey(projectProperty)).thenReturn(false);
 
+    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings)).isFalse();
+  }
+  
   @Test
   public void check_properties_assembly_property_pdb_not_found() {
     thrown.expect(IllegalArgumentException.class);

@@ -21,7 +21,10 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+
+import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -175,24 +178,7 @@ public class FxCopSensorTest {
     verify(parser).parse(new File(reportFile.getAbsolutePath()));
   }
 
-  @Test
-  public void check_properties() throws IOException {
-    assumeTrue(System.getProperty("os.name").startsWith("Windows"));
-    thrown.expectMessage("No FxCop analysis has been performed on this project");
-
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "");
-    new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
-  }
-
-  @Test
-  public void check_properties2() throws IOException {
-    assumeTrue(System.getProperty("os.name").startsWith("Windows"));
-    thrown.expectMessage("No FxCop analysis has been performed on this project");
-
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectFileKey", "", "", "", "", "", "");
-    new FxCopSensor(fxCopConf).execute(SensorContextTester.create(temp.newFolder()));
-  }
-
+  
   public void should_skip_analysis_when_misconfigured() {
     FxCopSensor sensor = new FxCopSensor(mock(FxCopConfiguration.class)) {
       @Override

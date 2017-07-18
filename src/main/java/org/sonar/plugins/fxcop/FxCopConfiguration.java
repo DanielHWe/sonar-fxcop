@@ -104,16 +104,20 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
     return reportPathPropertyKey;
   }
 
-  public void checkProperties(Settings settings) {
+  public boolean checkProperties(Settings settings) {
 	    if (settings.hasKey(reportPathPropertyKey)) {
 	      checkReportPathProperty(settings);
 	    } else {
+	    	if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) { 
+	    		return false; 
+	    	} 
 	      checkMandatoryProperties(settings);
 	      checkAssemblyProperty(settings);
 	      checkProjectFileProperty(settings);
 	      checkFxCopCmdPathProperty(settings);
 	      checkTimeoutProeprty(settings);
 	    }
+	    return true;
 	  }
   
   private void checkMandatoryProperties(Settings settings) {
