@@ -21,36 +21,48 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.base.Preconditions;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.sonar.api.config.Settings;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class FxCopConfiguration {
 
   private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
   private static final String DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY = "sonar.fxcop.timeoutMinutes";
+  private static final Logger LOG = Loggers.get(FxCopExecutor.class);
 
   private final String languageKey;
   private final String repositoryKey;
   private final String assemblyPropertyKey;
+  private final String projectFilePropertyKey;
   private String fxCopCmdPropertyKey;
   private String timeoutPropertyKey;
   private final String aspnetPropertyKey;
   private final String directoriesPropertyKey;
   private final String referencesPropertyKey;
   private final String reportPathPropertyKey;
+private int _assemblyCount;
 
-  public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
-    String directoriesPropertyKey, String referencesPropertyKey,
-    String reportPathPropertyKey) {
-    this.languageKey = languageKey;
-    this.repositoryKey = repositoryKey;
-    this.assemblyPropertyKey = assemblyPropertyKey;
-    this.fxCopCmdPropertyKey = fxCopCmdPropertyKey;
-    this.timeoutPropertyKey = timeoutPropertyKey;
-    this.aspnetPropertyKey = aspnetPropertyKey;
-    this.directoriesPropertyKey = directoriesPropertyKey;
-    this.referencesPropertyKey = referencesPropertyKey;
-    this.reportPathPropertyKey = reportPathPropertyKey;
-  }
+public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String projectFilePropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
+	    String directoriesPropertyKey, String referencesPropertyKey,
+	    String reportPathPropertyKey) {
+	    this.languageKey = languageKey;
+	    this.repositoryKey = repositoryKey;
+	    this.assemblyPropertyKey = assemblyPropertyKey;
+	    this.projectFilePropertyKey = projectFilePropertyKey;
+	    this.fxCopCmdPropertyKey = fxCopCmdPropertyKey;
+	    this.timeoutPropertyKey = timeoutPropertyKey;
+	    this.aspnetPropertyKey = aspnetPropertyKey;
+	    this.directoriesPropertyKey = directoriesPropertyKey;
+	    this.referencesPropertyKey = referencesPropertyKey;
+	    this.reportPathPropertyKey = reportPathPropertyKey;
+	  }
 
   public String languageKey() {
     return languageKey;
@@ -63,6 +75,10 @@ public class FxCopConfiguration {
   public String assemblyPropertyKey() {
     return assemblyPropertyKey;
   }
+  
+  public String projectFilePropertyKey() {
+	    return projectFilePropertyKey;
+	  }
 
   public String fxCopCmdPropertyKey() {
     return fxCopCmdPropertyKey;
@@ -89,23 +105,73 @@ public class FxCopConfiguration {
   }
 
   public boolean checkProperties(Settings settings) {
-    if (settings.hasKey(reportPathPropertyKey)) {
-      checkReportPathProperty(settings);
-    } else {
-      if (!settings.hasKey(assemblyPropertyKey)) {
-        return false;
-      }
-      checkAssemblyProperty(settings);
-      checkFxCopCmdPathProperty(settings);
-      checkTimeoutProeprty(settings);
-    }
-    return true;
-  }
+	    if (settings.hasKey(reportPathPropertyKey)) {
+	      checkReportPathProperty(settings);
+	    } else {
+	    	if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) { 
+	    		return false; 
+	    	} 
+	      checkMandatoryProperties(settings);
+	      checkAssemblyProperty(settings);
+	      checkProjectFileProperty(settings);
+	      checkFxCopCmdPathProperty(settings);
+	      checkTimeoutProeprty(settings);
+	    }
+	    return true;
+	  }
+  
+  private void checkMandatoryProperties(Settings settings) {
+	    if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) {
+	      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
+	        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
+	        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");
+	    }
+	  }
 
   private void checkAssemblyProperty(Settings settings) {
     String assemblyPath = settings.getString(assemblyPropertyKey);
 
-    File assemblyFile = new File(assemblyPath);
+    if (assemblyPath.contains("*")) {
+    	checkWildcardAssemblyPath(assemblyPath);
+    } else {
+        checkSingleAssemblyPath(assemblyPath);
+    }
+  }
+
+  private void checkWildcardAssemblyPath(String assemblyPath) {
+	  int lastSlash = assemblyPath.lastIndexOf('/');
+	  String folderPath = lastSlash > 0 ?  assemblyPath.substring(0, lastSlash) : "./";
+	  String fileName = lastSlash > 0 ?  assemblyPath.substring(lastSlash+1) : assemblyPath;
+		
+	  _assemblyCount = 0;
+	  try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(
+	    Paths.get(folderPath), fileName)) {			
+	    dirStream.forEach(path -> {
+	      if (path.toString().endsWith(".dll") || path.toString().endsWith(".exe")) {
+	    	LOG.debug("Check assembly: '" + path + "'.");
+	    	File pdbFile = new File(pdbPath(path.toString()));
+	    	if (pdbFile.isFile()) {
+	          _assemblyCount++;
+	    	}  else {
+	    		LOG.debug("Ignore file: '" + path + "' no pdb.");
+	    	}
+	      } else {
+	    	  LOG.debug("Ignore file: '" + path + "' no assembly.");
+	      }
+	    });
+	  } catch (IOException e) {
+		  LOG.error("Error during search assemblys", e);
+	    Preconditions.checkArgument(
+	    		      false,
+	    		      "Cannot find any assembly matching \"" + assemblyPath + "\" provided by the property \"" + assemblyPropertyKey + "\". Error: " + e.getMessage());
+	  }
+	  Preconditions.checkArgument(
+  		      _assemblyCount>0,
+  		      "Cannot find any assembly matching \"" + fileName + "\" in folder \""+folderPath+"\" provided by the property \"" + assemblyPropertyKey + "\".");
+  }
+  
+  private void checkSingleAssemblyPath(String assemblyPath) {
+	File assemblyFile = new File(assemblyPath);
     Preconditions.checkArgument(
       assemblyFile.isFile(),
       "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
@@ -114,6 +180,7 @@ public class FxCopConfiguration {
     Preconditions.checkArgument(
       pdbFile.isFile(),
       "Cannot find the .pdb file \"" + pdbFile.getAbsolutePath() + "\" inferred from the property \"" + assemblyPropertyKey + "\".");
+
   }
 
   private static String pdbPath(String assemblyPath) {
@@ -150,5 +217,17 @@ public class FxCopConfiguration {
       file.isFile(),
       "Cannot find the FxCop report \"" + file.getAbsolutePath() + "\" provided by the property \"" + reportPathPropertyKey + "\".");
   }
+  
+  private void checkProjectFileProperty(Settings settings) {
+		if (!settings.hasKey(projectFilePropertyKey)) return;
+	    String projectFilePath = settings.getString(projectFilePropertyKey);
+
+	    File assemblyFile = new File(projectFilePath);
+	    Preconditions.checkArgument(
+	      assemblyFile.isFile(),
+	      "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
+
+	    
+	  }
 
 }
