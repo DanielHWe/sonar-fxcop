@@ -13,4 +13,8 @@ cache:
     - '$HOME/.m2/repository'
 
 notifications:
-  email: false
+  email:
+    recipients:
+      - daniel.wehrle@haufe-lexware.com      
+    on_success: change
+    on_failure: always # default: always
