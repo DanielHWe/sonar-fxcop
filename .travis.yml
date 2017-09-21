@@ -22,6 +22,6 @@ deploy:
   provider: releases
   api_key:
     secure: PToFyyllcWniZA1IM6xsbDnbUQNtLrheFDlaSVVTAP9URIn1hmDBjFAcZhNuWBOqa2JAlNzkxDTdq/Hp6O8RRz7w+o+blSoGH+JaZQE7/zCi4AX8z3IUYVu0qwmerX616DHpHVejz3pEES2siDTZM23mRMbmtal78CmtGCf0XfAVQ0MMlJMww+de0Bi3VNB+ranYbuRiDdeo2Kudja3+cfVgy2hPq81c1q1GdrND3iWK+JAMAKwGiAbiAK5jUolXLw3XWyn3Uenm1ddIOEcRtXQ6QJBwXGRShDeoEsRDlsML6vw3AdsIx+x/y1xeo2Lt8bYyXqAVm8ZkQRjMBb+kWT2sOFWLk5VZe3PhTwRbLptR2twNsEydMlWFjpxndtzim/u7I8G6YzNK+9qJC2HvCmMbyAniPDC0DBlKSHcUEi7nWEBsm9UWilXblf2i3KvGdX8I8BB+Y5WbuUA6p3y6P+ZnNxfkwUPGFT4+sfjz6tKRkCnbfAhY3ykI0tK1Z3gHPOhB3pyd0rKVodHRGY/ynGEBNFzkhc+ykTOcpTTURQd58l25Yuv1aiigLO/2ISXBRCDyWX+k/9Y7YCkNrQS5rCHnfllKiMSTpMEHu3SrNVSAbtsB+uE4teU9n9V5C+oANNSXvXQctZmLh8+DYmp4ppU8qhTPcPRHTEJk31Ss8oM=
-  file: sonar-fxcop-plugin-1.2-SNAPSHOT.jar
+  file: /home/travis/build/DanielHWe/sonar-fxcop/target/sonar-fxcop-plugin-1.2-SNAPSHOT.jar
   on:
     repo: DanielHWe/sonar-fxcop
