@@ -26,3 +26,4 @@ deploy:
   file: /home/travis/build/DanielHWe/sonar-fxcop/target/sonar-fxcop-plugin-1.2-SNAPSHOT.jar
   on:
     repo: DanielHWe/sonar-fxcop
+    all_branches: true
