@@ -113,10 +113,12 @@ public class FxCopProjectGenerator {
 	    
 	    String binFileName = getBinFileName(type, name);
 	    Path result = null;
+	    String parentDir = projectFile.getParent();
+	    if (parentDir==null) parentDir = ".";
 	    
 	    for (String path : paths) {
 			try {
-				result = Paths.get(projectFile.getParent(), path, binFileName).toRealPath();
+				result = Paths.get(parentDir, path, binFileName).toRealPath();
 				break;
 			} catch (IOException ex){
 				LOG.info(ex.getMessage());

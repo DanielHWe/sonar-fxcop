@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.junit.After;
@@ -61,8 +62,10 @@ public class FxCopProjectGeneratorTest {
 		  
 		  File binFile = new File(TEST_EXE_RELEASE);
 		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  binFile = new File(TEST_DLL_RELEASE);
 		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String resultFileName = gen.generate(TEST_SLN);
 		  
@@ -96,6 +99,7 @@ public class FxCopProjectGeneratorTest {
 		  
 		  File binFile = new File(TEST_DLL_RELEASE);
 		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_DLL);
 		  
@@ -112,6 +116,7 @@ public class FxCopProjectGeneratorTest {
 		  
 		  File binFile = new File(TEST_EXE_RELEASE);
 		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_EXE);
 		  
@@ -128,6 +133,7 @@ public class FxCopProjectGeneratorTest {
 		  
 		  File binFile = new File(TEST_DLL_DEBUG);
 		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_DLL);
 		  
@@ -144,6 +150,7 @@ public class FxCopProjectGeneratorTest {
 		  
 		  File binFile = new File(TEST_EXE_DEBUG);
 		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_EXE);
 		  
