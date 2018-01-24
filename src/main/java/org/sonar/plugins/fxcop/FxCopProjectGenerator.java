@@ -121,6 +121,7 @@ public class FxCopProjectGenerator {
 				result = Paths.get(parentDir, path, binFileName).toRealPath();
 				break;
 			} catch (IOException ex){
+				System.out.println(ex.getMessage());
 				LOG.info(ex.getMessage());
 				result = null;
 			}
