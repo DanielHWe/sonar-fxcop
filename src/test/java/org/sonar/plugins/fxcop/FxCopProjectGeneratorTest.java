@@ -60,9 +60,9 @@ public class FxCopProjectGeneratorTest {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
 		  
 		  File binFile = new File(TEST_EXE_RELEASE);
-		  binFile.createNewFile();
+		  assertThat(binFile.createNewFile()).isTrue();
 		  binFile = new File(TEST_DLL_RELEASE);
-		  binFile.createNewFile();
+		  assertThat(binFile.createNewFile()).isTrue();
 		  
 		  String resultFileName = gen.generate(TEST_SLN);
 		  
@@ -127,7 +127,7 @@ public class FxCopProjectGeneratorTest {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
 		  
 		  File binFile = new File(TEST_DLL_DEBUG);
-		  binFile.createNewFile();
+		  assertThat(binFile.createNewFile()).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_DLL);
 		  
@@ -143,7 +143,7 @@ public class FxCopProjectGeneratorTest {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
 		  
 		  File binFile = new File(TEST_EXE_DEBUG);
-		  binFile.createNewFile();
+		  assertThat(binFile.createNewFile()).isTrue();
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_EXE);
 		  
