@@ -60,7 +60,7 @@ public class FxCopSensorTest {
   @Test
   public void testDescriptor() {
     DefaultSensorDescriptor descriptor = new DefaultSensorDescriptor();
-    new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "")).describe(descriptor);
+    new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", "")).describe(descriptor);
     assertThat(descriptor.name()).isEqualTo("FxCop (foo)");
   }
 

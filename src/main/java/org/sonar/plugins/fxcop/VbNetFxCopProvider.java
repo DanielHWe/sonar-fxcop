@@ -24,6 +24,7 @@ public class VbNetFxCopProvider {
 
   private static final String FXCOP_ASSEMBLIES_PROPERTY_KEY = "sonar.vbnet.fxcop.assembly";
   private static final String FXCOP_PROJECT_PROPERTY_KEY = "sonar.vbnet.fxcop.project";
+  private static final String FXCOP_SLN_FILE_PROPERTY_KEY = "sonar.cs.fxcop.slnFile";
   private static final String FXCOP_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.vbnet.fxcop.fxCopCmdPath";
   private static final String FXCOP_TIMEOUT_PROPERTY_KEY = "sonar.vbnet.fxcop.timeoutMinutes";
   private static final String FXCOP_ASPNET_PROPERTY_KEY = "sonar.vbnet.fxcop.aspnet";
@@ -37,6 +38,7 @@ public class VbNetFxCopProvider {
     FXCOP_ASSEMBLIES_PROPERTY_KEY,
     FXCOP_PROJECT_PROPERTY_KEY,
     FXCOP_FXCOPCMD_PATH_PROPERTY_KEY,
+    FXCOP_SLN_FILE_PROPERTY_KEY,
     FXCOP_TIMEOUT_PROPERTY_KEY,
     FXCOP_ASPNET_PROPERTY_KEY,
     FXCOP_DIRECTORIES_PROPERTY_KEY,

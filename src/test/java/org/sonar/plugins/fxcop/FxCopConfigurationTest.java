@@ -36,7 +36,7 @@ public class FxCopConfigurationTest {
 
   @Test
   public void test() {
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
       "fooReferencesKey", "fooReportPathKey");
     assertThat(fxCopConf.languageKey()).isEqualTo("cs");
     assertThat(fxCopConf.repositoryKey()).isEqualTo("cs-fxcop");
@@ -48,7 +48,7 @@ public class FxCopConfigurationTest {
     assertThat(fxCopConf.referencesPropertyKey()).isEqualTo("fooReferencesKey");
     assertThat(fxCopConf.reportPathPropertyKey()).isEqualTo("fooReportPathKey");
 
-    fxCopConf = new FxCopConfiguration("vbnet", "vbnet-fxcop", "barAssemblyKey", "", "barFxCopCmdPathKey", "barTimeoutKey", "barAspnetKey", "barDirectoriesKey",
+    fxCopConf = new FxCopConfiguration("vbnet", "vbnet-fxcop", "barAssemblyKey", "", "", "barFxCopCmdPathKey", "barTimeoutKey", "barAspnetKey", "barDirectoriesKey",
       "barReferencesKey", "barReportPathKey");
     assertThat(fxCopConf.languageKey()).isEqualTo("vbnet");
     assertThat(fxCopConf.repositoryKey()).isEqualTo("vbnet-fxcop");
@@ -63,7 +63,7 @@ public class FxCopConfigurationTest {
   
   @Test
   public void testWildCard() {
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "foo/AssemblyKey*", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "foo/AssemblyKey*", "", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
       "fooReferencesKey", "fooReportPathKey");
     assertThat(fxCopConf.languageKey()).isEqualTo("cs");
     assertThat(fxCopConf.repositoryKey()).isEqualTo("cs-fxcop");
@@ -75,7 +75,7 @@ public class FxCopConfigurationTest {
     assertThat(fxCopConf.referencesPropertyKey()).isEqualTo("fooReferencesKey");
     assertThat(fxCopConf.reportPathPropertyKey()).isEqualTo("fooReportPathKey");
 
-    fxCopConf = new FxCopConfiguration("vbnet", "vbnet-fxcop", "bar/AssemblyKey*", "", "barFxCopCmdPathKey", "barTimeoutKey", "barAspnetKey", "barDirectoriesKey",
+    fxCopConf = new FxCopConfiguration("vbnet", "vbnet-fxcop", "bar/AssemblyKey*", "", "", "barFxCopCmdPathKey", "barTimeoutKey", "barAspnetKey", "barDirectoriesKey",
       "barReferencesKey", "barReportPathKey");
     assertThat(fxCopConf.languageKey()).isEqualTo("vbnet");
     assertThat(fxCopConf.repositoryKey()).isEqualTo("vbnet-fxcop");
@@ -98,7 +98,7 @@ public class FxCopConfigurationTest {
     when(settings.hasKey("fooFxCopReportPathKey")).thenReturn(true);
     when(settings.getString("fooFxCopReportPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/fxcop-report.xml").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey").checkProperties(settings);
   }
 
   @Test
@@ -109,12 +109,12 @@ public class FxCopConfigurationTest {
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
     when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
   }
 
 
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_false_when_assembly_property_not_found() {
 
     Settings settings = mock(Settings.class);
@@ -125,31 +125,30 @@ public class FxCopConfigurationTest {
 
 
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "");
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "", "");
 
     assertThat(config.checkProperties(settings)).isFalse();
-
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_assembly_property_is_set() {
     Settings settings = mock(Settings.class);
     String assemblyProperty = "fooAssemblyKey";
-    settings.setProperty("assemblyProperty", "fooAssemblyKey");
+    settings.setProperty("assemblyProperty", assemblyProperty);
     when(settings.hasKey(assemblyProperty)).thenReturn(false);
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "");
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", null, "", "", "", "", "", "");
     assertThat(config.checkProperties(settings)).isFalse();
   }
   
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_project_property_is_set() {
     Settings settings = mock(Settings.class);
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
     when(settings.hasKey(projectProperty)).thenReturn(false);
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "");
+    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "", "");
     assertThat(config.checkProperties(settings)).isFalse();
   }
   
@@ -164,7 +163,7 @@ public class FxCopConfigurationTest {
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings);
   }
 
   @Test
@@ -173,7 +172,7 @@ public class FxCopConfigurationTest {
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("sonar.fxcop.installDirectory", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
     fxCopConf.checkProperties(settings);
 
     assertThat(settings.getString(fxCopConf.fxCopCmdPropertyKey())).isEqualTo(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
@@ -190,7 +189,7 @@ public class FxCopConfigurationTest {
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
   }
 
   @Test
@@ -200,7 +199,7 @@ public class FxCopConfigurationTest {
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
     settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "", "", "", "");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "", "", "", "");
     fxCopConf.checkProperties(settings);
 
     assertThat(settings.getString(fxCopConf.timeoutPropertyKey())).isEqualTo("42");
@@ -216,7 +215,7 @@ public class FxCopConfigurationTest {
     Settings settings = new Settings();
     settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
     fxCopConf.checkProperties(settings);
   }
   
@@ -230,7 +229,21 @@ public class FxCopConfigurationTest {
     Settings settings = new Settings();
     settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    fxCopConf.checkProperties(settings);
+  }
+  
+  @Test
+  public void check_properties_sln_path_not_found() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Cannot find the FxCop report");
+    thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
+    thrown.expectMessage("\"fooReportPathKey\"");
+
+    Settings settings = new Settings();
+    settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
+
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
     fxCopConf.checkProperties(settings);
   }
 

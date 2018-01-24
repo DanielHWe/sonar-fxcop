@@ -35,7 +35,7 @@ public class FxCopExecutor {
 
   public void execute(String executable, String targetFile, File rulesetFile, File reportFile, int timeout, boolean aspnet, List<String> directories, List<String> references) {
 	String targetFileArgument = "/file:" + targetFile;
-	if (targetFile.endsWith(".fxcop")) {
+	if (targetFile.toLowerCase().endsWith(".fxcop")) {
 	   targetFileArgument = "/project:" +targetFile;
 	}
     Command command = Command.create(getExecutable(executable))

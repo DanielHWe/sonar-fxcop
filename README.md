@@ -15,3 +15,13 @@ To use with **Version 4** and above you have to define "sonar.cs.fxcop.assembly
 **__Example:__**
 
 SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /d:"sonar.cs.fxcop.assembly=/bin/debug/My.dll" /d:"sonar.cs.fxcop.fxCopCmdPath=C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe" /d:"sonar.cs.fxcop.directory=bin\debug\"
+
+### Scan on base of an sln file
+
+With 1.3 RC 1 there is the possibility to scan a compleate sln file. (The plugin will generate a fxcop project file including all assemblies from steh solution to scan the assemblies).
+
+Parameter is 'sonar.cs.fxcop.slnFile' while not use 'sonar.cs.fxcop.assembly'.
+
+**__Example:__**
+
+SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /d:"sonar.cs.fxcop.slnFile=/bin/debug/My.dll" /d:"sonar.cs.fxcop.fxCopCmdPath=C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe" /d:"sonar.cs.fxcop.directory=bin\debug\"

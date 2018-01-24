@@ -85,7 +85,20 @@ public class FxCopSensor implements Sensor {
 
       reportFile = new File(context.fileSystem().workDir(), "fxcop-report.xml");
 
-      String target = settings.hasKey(fxCopConf.assemblyPropertyKey()) ? settings.getString(fxCopConf.assemblyPropertyKey()) : settings.getString(fxCopConf.projectFilePropertyKey());
+      String target = null;
+      
+      if (settings.hasKey(fxCopConf.assemblyPropertyKey())){
+    	  target = settings.getString(fxCopConf.assemblyPropertyKey());
+      }
+      else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
+    	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+    	  target = gen.generate(settings.getString(fxCopConf.slnFilePropertyKey()));
+      }
+      else { 
+    	  target = settings.getString(fxCopConf.projectFilePropertyKey());
+      }
+      
+      
       
       executor.execute(settings.getString(fxCopConf.fxCopCmdPropertyKey()), target,
         rulesetFile, reportFile, settings.getInt(fxCopConf.timeoutPropertyKey()), settings.getBoolean(fxCopConf.aspnetPropertyKey()),

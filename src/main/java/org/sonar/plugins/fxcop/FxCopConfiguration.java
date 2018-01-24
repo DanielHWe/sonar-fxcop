@@ -41,6 +41,7 @@ public class FxCopConfiguration {
   private final String repositoryKey;
   private final String assemblyPropertyKey;
   private final String projectFilePropertyKey;
+  private final String slnFilePropertyKey;
   private String fxCopCmdPropertyKey;
   private String timeoutPropertyKey;
   private final String aspnetPropertyKey;
@@ -49,13 +50,16 @@ public class FxCopConfiguration {
   private final String reportPathPropertyKey;
 private int _assemblyCount;
 
-public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, String projectFilePropertyKey, String fxCopCmdPropertyKey, String timeoutPropertyKey, String aspnetPropertyKey,
+public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, 
+		String projectFilePropertyKey, String slnFilePropertyKey, String fxCopCmdPropertyKey, 
+		String timeoutPropertyKey, String aspnetPropertyKey,
 	    String directoriesPropertyKey, String referencesPropertyKey,
 	    String reportPathPropertyKey) {
 	    this.languageKey = languageKey;
 	    this.repositoryKey = repositoryKey;
 	    this.assemblyPropertyKey = assemblyPropertyKey;
 	    this.projectFilePropertyKey = projectFilePropertyKey;
+	    this.slnFilePropertyKey = slnFilePropertyKey;
 	    this.fxCopCmdPropertyKey = fxCopCmdPropertyKey;
 	    this.timeoutPropertyKey = timeoutPropertyKey;
 	    this.aspnetPropertyKey = aspnetPropertyKey;
@@ -78,6 +82,10 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
   
   public String projectFilePropertyKey() {
 	    return projectFilePropertyKey;
+	  }
+  
+  public String slnFilePropertyKey() {
+	    return slnFilePropertyKey;
 	  }
 
   public String fxCopCmdPropertyKey() {
@@ -108,20 +116,36 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	    if (settings.hasKey(reportPathPropertyKey)) {
 	      checkReportPathProperty(settings);
 	    } else {
-	    	if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) { 
+	    	if (!settings.hasKey(assemblyPropertyKey) && 
+	    		settings.hasKey(projectFilePropertyKey)&& 
+	    		!settings.hasKey(slnFilePropertyKey)) 
+	    	{ 
 	    		return false; 
 	    	} 
-	      checkMandatoryProperties(settings);
-	      checkAssemblyProperty(settings);
-	      checkProjectFileProperty(settings);
-	      checkFxCopCmdPathProperty(settings);
-	      checkTimeoutProeprty(settings);
+	    	else if (!settings.hasKey(assemblyPropertyKey) && 
+		    		!settings.hasKey(projectFilePropertyKey)&& 
+		    		settings.hasKey(slnFilePropertyKey)) 
+	    	{ 
+	    		checkMandatoryProperties(settings);
+		        checkSlnProperty(settings);
+		        checkProjectFileProperty(settings);
+		        checkFxCopCmdPathProperty(settings);
+		        checkTimeoutProeprty(settings);
+	    	} 
+	    	else {
+		      checkMandatoryProperties(settings);
+		      checkAssemblyProperty(settings);
+		      checkProjectFileProperty(settings);
+		      checkFxCopCmdPathProperty(settings);
+		      checkTimeoutProeprty(settings);
+	    	}
 	    }
 	    return true;
 	  }
   
   private void checkMandatoryProperties(Settings settings) {
-	    if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey)) {
+	 
+	    if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey) && !settings.hasKey(slnFilePropertyKey)) {
 	      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
 	        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
 	        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");
@@ -225,7 +249,19 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	    File assemblyFile = new File(projectFilePath);
 	    Preconditions.checkArgument(
 	      assemblyFile.isFile(),
-	      "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
+	      "Cannot find the project \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + projectFilePropertyKey + "\".");
+
+	    
+	  }
+  
+  private void checkSlnProperty(Settings settings) {
+		if (!settings.hasKey(slnFilePropertyKey)) return;
+	    String slnFilePath = settings.getString(slnFilePropertyKey);
+
+	    File slnFile = new File(slnFilePath);
+	    Preconditions.checkArgument(
+	    		slnFile.isFile(),
+	      "Cannot find the sln file \"" + slnFile.getAbsolutePath() + "\" provided by the property \"" + slnFilePropertyKey + "\".");
 
 	    
 	  }
