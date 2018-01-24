@@ -69,76 +69,21 @@ public class FxCopProjectGenerator {
 
 	public String getDllPathFromCsProj(String project) throws IOException {
 		LOG.debug("Add '"+project+"' to FxCop configuration.");
-		File projectFile = new File(project);
 		
-		final Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
-		final Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
-		final Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\]+)</OutputPath>");
+		
+		
 		//Pattern.matches("<OutputType>(\\w+)</OutputType>", input)
 		   
-		String name = null;
-		String type = null;
-		List<String> paths = new ArrayList<String>();
-		
-	       final BufferedReader reader = new BufferedReader(new FileReader(new File(project)));
-	       while(reader.ready()) {
-	    	   String currentLine = reader.readLine();
-	    	   Matcher m = patternType.matcher(currentLine);
-	           if (m.find()) {
-	        	   type = (m.group(1));
-	           }
-	           m = patternName.matcher(currentLine);
-	           if (m.find()) {
-	        	   name = (m.group(1));
-	           }
-	           m = patternPath.matcher(currentLine);
-	           if (m.find()) {
-	        	   paths.add(m.group(1));
-	           }
-	       }
-	       reader.close();
+		CSharpProjectInfo projectInfo = new CSharpProjectInfo(project);
+		return projectInfo.getDllPathFromExistingBinary();
 	       
-	    if (paths == null) {
-	    	LOG.warn("No output path found for '"+project+"'.");
-	    	throw new IllegalArgumentException("No output path found for '"+project+"'.");
-	    }
-	    if (type == null) {
-	    	LOG.warn("No output type found for '"+project+"'.");
-	    	throw new IllegalArgumentException("No output type found for '"+project+"'.");
-	    }
-	    if (name == null) {
-	    	LOG.warn("No output name found for '"+project+"'.");
-	    	throw new IllegalArgumentException("No output name found for '"+project+"'.");
-	    }
+	       
 	    
-	    String binFileName = getBinFileName(type, name);
-	    Path result = null;
-	    String parentDir = projectFile.getParent();
-	    if (parentDir==null) parentDir = ".";
 	    
-	    for (String path : paths) {
-			try {
-				result = Paths.get(parentDir, path, binFileName).toRealPath();
-				break;
-			} catch (IOException ex){
-				System.out.println(ex.getMessage());
-				LOG.info(ex.getMessage());
-				result = null;
-			}
-		}
-	    if (result == null) {
-			LOG.error(binFileName + " was not found in any output directory, please build project before scan.");
-			throw new IllegalStateException(binFileName + " was not found in any output directory, please build project before scan.");
-	    }
-		return result.toString();
+	    
 	}
 
-	private String getBinFileName(String type, String name) {
-		if (type.equalsIgnoreCase("Library")){
-			return name + ".dll";
-		}
-		return name + ".exe";
-	}
+	
 
 	public String[] getCsprojForSolution(File slnFileObj) throws IOException {
 		List<String> result = new ArrayList<String>();
