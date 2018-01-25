@@ -58,3 +58,4 @@ packages/
 # Visual Studio profiler files
 *.psess
 *.vsp
+*.fxcop

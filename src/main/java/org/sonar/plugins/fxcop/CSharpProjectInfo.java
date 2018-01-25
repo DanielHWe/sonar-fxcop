@@ -63,12 +63,19 @@ public class CSharpProjectInfo {
 	           }
 	           m = patternPath.matcher(currentLine);
 	           if (m.find()) {
-	        	   paths.add(m.group(1));
+	        	   paths.add(ConvertPath(m.group(1)));	        	   
 	           }
 	       }
 		} finally {
 	       reader.close();
 		}
+	}
+	
+	private String ConvertPath(String path){
+		if (File.pathSeparator.equals("\\")) {
+ 		   return path;
+ 	   }
+		return path.replace('\\', '/');
 	}
 
 	public String getDllPathFromExistingBinary() {
@@ -85,7 +92,7 @@ public class CSharpProjectInfo {
 				break;
 			} catch (IOException ex){
 				if (sbPath.length()>0) sbPath.append(", ");
-				sbPath.append(parentDir).append("\\").append(path);
+				sbPath.append(Paths.get(parentDir, path).toString());
 				LOG.info(ex.getMessage());
 				result = null;
 			}
