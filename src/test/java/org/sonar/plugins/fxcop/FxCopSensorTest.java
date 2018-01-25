@@ -131,10 +131,13 @@ public class FxCopSensorTest {
         new FxCopIssue(700, "CA0000", baseDir.toString(), "Class7.cs", 7, "Fourth message"), // language "bar" -> on file+line
         new FxCopIssue(800, "CR1000", baseDir.toString(), "Class8.cs", 8, "Fifth message"))); // all good -> on file+line
 
+    executor.setExecutable("FxCopCmd.exe");
+    executor.setTimeout(42);
+    executor.setAspnet(true);
     sensor.analyse(writer, parser, executor, context); 
 
     verify(writer).write(ImmutableList.of("CA0000", "CA1000", "CR1000"), new File(workingDir, "fxcop-sonarqube.ruleset"));
-    verify(executor).execute("FxCopCmd.exe", "MyLibrary.dll", new File(workingDir, "fxcop-sonarqube.ruleset"), new File(workingDir, "fxcop-report.xml"), 42, true,
+    verify(executor).execute("MyLibrary.dll", new File(workingDir, "fxcop-sonarqube.ruleset"), new File(workingDir, "fxcop-report.xml"), 
       ImmutableList.of("c:/", "d:/"), ImmutableList.<String>of());
 
     assertThat(context.allIssues())
@@ -168,12 +171,15 @@ public class FxCopSensorTest {
     FxCopRulesetWriter writer = mock(FxCopRulesetWriter.class);
     FxCopReportParser parser = mock(FxCopReportParser.class);
     FxCopExecutor executor = mock(FxCopExecutor.class);
+    executor.setExecutable(anyString());
+    executor.setTimeout(anyInt());
+    executor.setAspnet(anyBoolean());
 
     sensor.analyse(writer, parser, executor, context);
 
     verify(writer, never()).write(anyListOf(String.class), any(File.class));
-    verify(executor, never()).execute(
-      anyString(), anyString(), any(File.class), any(File.class), anyInt(), anyBoolean(), anyListOf(String.class), anyListOf(String.class));
+    verify(executor, never()).execute(anyString(),
+      any(File.class), any(File.class),  anyListOf(String.class), anyListOf(String.class));
 
     verify(parser).parse(new File(reportFile.getAbsolutePath()));
   }

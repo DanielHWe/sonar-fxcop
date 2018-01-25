@@ -17,14 +17,14 @@ import org.sonar.api.utils.log.Loggers;
 
 public class CSharpProjectInfo {
 	private static final Logger LOG = Loggers.get(FxCopSensor.class);
-	final static Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
-	final static Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
-	final static Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\]+)</OutputPath>");
+	static final Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
+	static final Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
+	static final Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\]+)</OutputPath>");
 	
 	private String project = null;
 	private String name = null;
 	private String type = null;
-	private List<String> paths = new ArrayList<String>();
+	private List<String> paths = new ArrayList<>();
 	
 	CSharpProjectInfo(String project) throws IOException{
 		this.project = project;
@@ -48,7 +48,7 @@ public class CSharpProjectInfo {
 		
 	}
 
-	private void scanProjectFile() throws FileNotFoundException, IOException {
+	private void scanProjectFile() throws IOException {
 		final BufferedReader reader = new BufferedReader(new FileReader(new File(project)));
 		try {
 	       while(reader.ready()) {
@@ -63,7 +63,7 @@ public class CSharpProjectInfo {
 	           }
 	           m = patternPath.matcher(currentLine);
 	           if (m.find()) {
-	        	   paths.add(ConvertPath(m.group(1)));	        	   
+	        	   paths.add(convertPath(m.group(1)));	        	   
 	           }
 	       }
 		} finally {
@@ -71,7 +71,7 @@ public class CSharpProjectInfo {
 		}
 	}
 	
-	private String ConvertPath(String path){
+	private String convertPath(String path){
 		if (File.pathSeparator.equals("\\")) {
  		   return path;
  	   }

@@ -2,14 +2,10 @@ package org.sonar.plugins.fxcop;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -28,6 +24,7 @@ import org.sonar.api.utils.log.Loggers;
 import org.w3c.dom.*;
 
 public class FxCopProjectGenerator {
+	private static final String FX_COP_PLUGIN_FAILED_TO_SCAN_DUE_TO_FXCOP_CONFIGURATION_ISSUE = "FxCop Plugin failed to scan, due to fxcop configuration issue.";
 	private static final Logger LOG = Loggers.get(FxCopSensor.class);
 
 	 public String generate(String slnFileName) {
@@ -37,7 +34,7 @@ public class FxCopProjectGenerator {
 		
 		String[] targetDlls = getTargetFiles(slnFileObj);
 		
-		Document dom = createConfigObject(slnFileObj, targetDlls);		
+		Document dom = createConfigObject(targetDlls);		
 		saveToXML(dom, fxCopConfigObj);
 		LOG.debug("Finish create FxCop configuration '"+fxCopConfigObj.getAbsolutePath()+"'");
 		return fxCopConfigObj.getAbsolutePath();
@@ -46,13 +43,9 @@ public class FxCopProjectGenerator {
 	 private String[] getTargetFiles(File slnFileObj) {
 		 try {
 			String[] csprojFiles = getCsprojForSolution(slnFileObj);
-			List<String> targetFileList = new ArrayList<String>();
+			List<String> targetFileList = new ArrayList<>();
 			for (String project : csprojFiles) {
-				try {
-					targetFileList.add(getDllPathFromCsProj(project));
-				} catch (IllegalArgumentException iae){
-					LOG.warn("Ignore '"+project+"' due to parsing error.");
-				}
+				addProjectAssemblyIfExists(targetFileList, project);
 			}
 			
 			if (targetFileList.isEmpty()) {
@@ -67,6 +60,14 @@ public class FxCopProjectGenerator {
 		 }
 	}
 
+	private void addProjectAssemblyIfExists(List<String> targetFileList, String project) throws IOException {
+		try {
+			targetFileList.add(getDllPathFromCsProj(project));
+		} catch (IllegalArgumentException iae){
+			LOG.warn("Ignore '"+project+"' due to parsing error.");
+		}
+	}
+
 	public String getDllPathFromCsProj(String project) throws IOException {
 		LOG.debug("Add '"+project+"' to FxCop configuration.");
 		
@@ -76,42 +77,39 @@ public class FxCopProjectGenerator {
 		   
 		CSharpProjectInfo projectInfo = new CSharpProjectInfo(project);
 		return projectInfo.getDllPathFromExistingBinary();
-	       
-	       
-	    
-	    
 	    
 	}
 
 	
 
 	public String[] getCsprojForSolution(File slnFileObj) throws IOException {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		final Pattern pattern = Pattern.compile("\\\"([\\w\\.\\\\\\ \\-]+\\.csproj)\\\"");
 		   
 		String parentDir = slnFileObj.getParent();
-		if (parentDir == null) parentDir = "";
+		if (parentDir == null) {
+			parentDir = "";
+		}
 		
-       final BufferedReader reader = new BufferedReader(new FileReader(slnFileObj));
-       while(reader.ready()) {
-    	   Matcher m = pattern.matcher(reader.readLine());
-           if (m.find()) {
-        	   
-        	   String file = Paths.get(parentDir, m.group(1)).toString();
-        	   if (!(new File(file).exists())){
-        		   reader.close();
-        		   LOG.error("Project File not '"+file+"' found for " + slnFileObj.getAbsolutePath());
-        		   throw new IllegalStateException("Project File not found: " + file);
-        	   }
-        	   result.add(file);
-           }
+       try (final BufferedReader reader = new BufferedReader(new FileReader(slnFileObj))) {
+	       while(reader.ready()) {
+	    	   Matcher m = pattern.matcher(reader.readLine());
+	           if (m.find()) {        	   
+	        	   String file = Paths.get(parentDir, m.group(1)).toString();
+	        	   if (!(new File(file).exists())){
+	        		   reader.close();
+	        		   LOG.error("Project File not '"+file+"' found for " + slnFileObj.getAbsolutePath());
+	        		   throw new IllegalStateException("Project File not found: " + file);
+	        	   }
+	        	   result.add(file);
+	           }
+	       }
        }
-       reader.close();
        
        return result.toArray(new String[result.size()]);
 	}
 
-	private Document createConfigObject(File slnFileObj, String[] targetDlls) {
+	private Document createConfigObject(String[] targetDlls) {
 		 Document dom;
          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
          try {
@@ -134,14 +132,14 @@ public class FxCopProjectGenerator {
          
         } catch (Exception ex) {
         	LOG.error("Fail to read fxcop configuration template: " + ex.getMessage());
-            throw new IllegalStateException("FxCop Plugin failed to scan, due to fxcop configuration issue.", ex);
+            throw new IllegalStateException(FX_COP_PLUGIN_FAILED_TO_SCAN_DUE_TO_FXCOP_CONFIGURATION_ISSUE, ex);
         } 
 		return dom;
 	}
 
 	private void saveToXML(Document dom, File fxCopConfigObj) {
-		FileOutputStream fs = null;
-	    try {
+
+	    try (FileOutputStream fs = new FileOutputStream(fxCopConfigObj.getAbsoluteFile())) {
             Transformer tr = TransformerFactory.newInstance().newTransformer();
             tr.setOutputProperty(OutputKeys.INDENT, "yes");
             tr.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -149,24 +147,17 @@ public class FxCopProjectGenerator {
             tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             
             
-            fs = new FileOutputStream(fxCopConfigObj.getAbsoluteFile());
+            ;
             // send DOM to file
             tr.transform(new DOMSource(dom), 
                                  new StreamResult(fs));
 
         } catch (TransformerException te) {
         	LOG.error("Fail to create fxcop configuration: " + te.getMessage());
-            throw new IllegalStateException("FxCop Plugin failed to scan, due to fxcop configuration issue.", te);
+            throw new IllegalStateException(FX_COP_PLUGIN_FAILED_TO_SCAN_DUE_TO_FXCOP_CONFIGURATION_ISSUE, te);
         } catch (IOException ioe) {
         	LOG.error("Fail to write fxcop configuration: " + ioe.getMessage());
-        	throw new IllegalStateException("FxCop Plugin failed to scan, due to fxcop configuration issue.", ioe);
-        }finally {
-        	try {
-        		if (fs !=null) fs.close();
-        	} catch (IOException ioe) {
-            	LOG.error("Fail to write fxcop configuration: " + ioe.getMessage());
-            	throw new IllegalStateException("FxCop Plugin failed to scan, due to fxcop configuration issue.", ioe);
-            }
+        	throw new IllegalStateException(FX_COP_PLUGIN_FAILED_TO_SCAN_DUE_TO_FXCOP_CONFIGURATION_ISSUE, ioe);
         }
 	    
 	}
@@ -179,7 +170,7 @@ public class FxCopProjectGenerator {
 		return new File(slnFileObj.getAbsoluteFile() + ft.format(dNow) + ".fxcop");
 	}
 	
-	private static String XML_TEMPLATE =
+	private static final String XML_TEMPLATE =
 			"<FxCopProject Version=\"1.36\" Name=\"My FxCop Project\">" +
 		" <ProjectOptions>" +
 		"  <SharedProject>True</SharedProject>" +

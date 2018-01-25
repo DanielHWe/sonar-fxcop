@@ -24,4 +24,6 @@ Parameter is 'sonar.cs.fxcop.slnFile' while not use 'sonar.cs.fxcop.assembly'.
 
 **__Example:__**
 
-SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /d:"sonar.cs.fxcop.slnFile=/bin/debug/My.dll" /d:"sonar.cs.fxcop.fxCopCmdPath=C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe" /d:"sonar.cs.fxcop.directory=bin\debug\"
+SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /d:"sonar.cs.fxcop.slnFile=MyProject.sln" /d:"sonar.cs.fxcop.fxCopCmdPath=C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe" /d:"sonar.cs.fxcop.directory=bin\debug\"
+msbuild /t:Rebuild MyProject.sln
+SonarQube.Scanner.MSBuild.exe end

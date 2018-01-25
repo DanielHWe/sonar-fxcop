@@ -32,8 +32,11 @@ public class FxCopExecutor {
 
   private static final Logger LOG = Loggers.get(FxCopExecutor.class);
   private static final String EXECUTABLE = "FxCopCmd.exe";
+  private String executable;
+  private int timeout;
+  private boolean aspnet;
 
-  public void execute(String executable, String targetFile, File rulesetFile, File reportFile, int timeout, boolean aspnet, List<String> directories, List<String> references) {
+  public void execute(String targetFile, File rulesetFile, File reportFile, List<String> directories, List<String> references) {
 	String targetFileArgument = "/file:" + targetFile;
 	if (targetFile.toLowerCase().endsWith(".fxcop")) {
 	   targetFileArgument = "/project:" +targetFile;
@@ -64,8 +67,9 @@ public class FxCopExecutor {
     LOG.info("FxCopCmd.exe ended with the exit code: " + exitCode);
 
     Preconditions.checkState((exitCode & 1) == 0,
-      "The execution of \"" + executable + "\" failed and returned " + exitCode
-        + " as exit code. See http://msdn.microsoft.com/en-us/library/bb429400(v=vs.80).aspx for details.");
+      "The execution of \"{0}\" failed and returned {1} as exit code. "
+      + "See http://msdn.microsoft.com/en-us/library/bb429400(v=vs.80).aspx for details.", 
+      executable, exitCode);
   }
 
   /**
@@ -74,5 +78,29 @@ public class FxCopExecutor {
   private static String getExecutable(String path) {
     return path.endsWith(EXECUTABLE) ? path : new File(path, EXECUTABLE).getAbsolutePath();
   }
+
+public String getExecutable() {
+	return executable;
+}
+
+public void setExecutable(String executable) {
+	this.executable = executable;
+}
+
+public int getTimeout() {
+	return timeout;
+}
+
+public void setTimeout(int timeout) {
+	this.timeout = timeout;
+}
+
+public boolean isAspnet() {
+	return aspnet;
+}
+
+public void setAspnet(boolean aspnet) {
+	this.aspnet = aspnet;
+}
 
 }

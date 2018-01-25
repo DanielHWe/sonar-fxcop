@@ -33,7 +33,8 @@ import org.sonar.api.utils.log.Loggers;
 
 public class FxCopConfiguration {
 
-  private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
+  private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
+private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
   private static final String DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY = "sonar.fxcop.timeoutMinutes";
   private static final Logger LOG = Loggers.get(FxCopExecutor.class);
 
@@ -44,11 +45,12 @@ public class FxCopConfiguration {
   private final String slnFilePropertyKey;
   private String fxCopCmdPropertyKey;
   private String timeoutPropertyKey;
+  private int assemblyCount;
   private final String aspnetPropertyKey;
   private final String directoriesPropertyKey;
   private final String referencesPropertyKey;
   private final String reportPathPropertyKey;
-private int _assemblyCount;
+
 
 public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, 
 		String projectFilePropertyKey, String slnFilePropertyKey, String fxCopCmdPropertyKey, 
@@ -155,7 +157,10 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
   private void checkAssemblyProperty(Settings settings) {
     String assemblyPath = settings.getString(assemblyPropertyKey);
 
-    if (assemblyPath.contains("*")) {
+    if (assemblyPath == null) {
+    	LOG.error("The property '" + assemblyPropertyKey + "' is not set.");
+    	throw new IllegalArgumentException("The property '" + assemblyPropertyKey + "' is not set.");
+    } else if (assemblyPath.contains("*")) {
     	checkWildcardAssemblyPath(assemblyPath);
     } else {
         checkSingleAssemblyPath(assemblyPath);
@@ -167,15 +172,22 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	  String folderPath = lastSlash > 0 ?  assemblyPath.substring(0, lastSlash) : "./";
 	  String fileName = lastSlash > 0 ?  assemblyPath.substring(lastSlash+1) : assemblyPath;
 		
-	  _assemblyCount = 0;
-	  try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(
+	  assemblyCount = 0;
+	  countMatchingAssemblyFiles(assemblyPath, folderPath, fileName);
+	  Preconditions.checkArgument(
+  		      assemblyCount>0,
+  		      "Cannot find any assembly matching \"" + fileName + "\" in folder \""+folderPath+PROVIDED_BY_THE_PROPERTY + assemblyPropertyKey + "\".");
+  }
+
+  private void countMatchingAssemblyFiles(String assemblyPath, String folderPath, String fileName) {
+	try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(
 	    Paths.get(folderPath), fileName)) {			
 	    dirStream.forEach(path -> {
 	      if (path.toString().endsWith(".dll") || path.toString().endsWith(".exe")) {
 	    	LOG.debug("Check assembly: '" + path + "'.");
 	    	File pdbFile = new File(pdbPath(path.toString()));
 	    	if (pdbFile.isFile()) {
-	          _assemblyCount++;
+	           assemblyCount++;
 	    	}  else {
 	    		LOG.debug("Ignore file: '" + path + "' no pdb.");
 	    	}
@@ -187,18 +199,15 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 		  LOG.error("Error during search assemblys", e);
 	    Preconditions.checkArgument(
 	    		      false,
-	    		      "Cannot find any assembly matching \"" + assemblyPath + "\" provided by the property \"" + assemblyPropertyKey + "\". Error: " + e.getMessage());
+	    		      "Cannot find any assembly matching \"" + assemblyPath + PROVIDED_BY_THE_PROPERTY + assemblyPropertyKey + "\". Error: " + e.getMessage());
 	  }
-	  Preconditions.checkArgument(
-  		      _assemblyCount>0,
-  		      "Cannot find any assembly matching \"" + fileName + "\" in folder \""+folderPath+"\" provided by the property \"" + assemblyPropertyKey + "\".");
   }
   
   private void checkSingleAssemblyPath(String assemblyPath) {
 	File assemblyFile = new File(assemblyPath);
     Preconditions.checkArgument(
       assemblyFile.isFile(),
-      "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + assemblyPropertyKey + "\".");
+      "Cannot find the assembly \"" + assemblyFile.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + assemblyPropertyKey + "\".");
 
     File pdbFile = new File(pdbPath(assemblyPath));
     Preconditions.checkArgument(
@@ -226,7 +235,7 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
     File file = new File(value);
     Preconditions.checkArgument(
       file.isFile(),
-      "Cannot find the FxCopCmd executable \"" + file.getAbsolutePath() + "\" provided by the property \"" + fxCopCmdPropertyKey + "\".");
+      "Cannot find the FxCopCmd executable \"" + file.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + fxCopCmdPropertyKey + "\".");
   }
 
   private void checkTimeoutProeprty(Settings settings) {
@@ -239,29 +248,33 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
     File file = new File(settings.getString(reportPathPropertyKey));
     Preconditions.checkArgument(
       file.isFile(),
-      "Cannot find the FxCop report \"" + file.getAbsolutePath() + "\" provided by the property \"" + reportPathPropertyKey + "\".");
+      "Cannot find the FxCop report \"" + file.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + reportPathPropertyKey + "\".");
   }
   
   private void checkProjectFileProperty(Settings settings) {
-		if (!settings.hasKey(projectFilePropertyKey)) return;
+		if (!settings.hasKey(projectFilePropertyKey)){
+			return;
+		}
 	    String projectFilePath = settings.getString(projectFilePropertyKey);
 
 	    File assemblyFile = new File(projectFilePath);
 	    Preconditions.checkArgument(
 	      assemblyFile.isFile(),
-	      "Cannot find the project \"" + assemblyFile.getAbsolutePath() + "\" provided by the property \"" + projectFilePropertyKey + "\".");
+	      "Cannot find the project \"" + assemblyFile.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + projectFilePropertyKey + "\".");
 
 	    
 	  }
   
   private void checkSlnProperty(Settings settings) {
-		if (!settings.hasKey(slnFilePropertyKey)) return;
+		if (!settings.hasKey(slnFilePropertyKey)){
+			return;
+		}
 	    String slnFilePath = settings.getString(slnFilePropertyKey);
 
 	    File slnFile = new File(slnFilePath);
 	    Preconditions.checkArgument(
 	    		slnFile.isFile(),
-	      "Cannot find the sln file \"" + slnFile.getAbsolutePath() + "\" provided by the property \"" + slnFilePropertyKey + "\".");
+	      "Cannot find the sln file \"" + slnFile.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + slnFilePropertyKey + "\".");
 
 	    
 	  }

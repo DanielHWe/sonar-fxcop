@@ -80,35 +80,37 @@ public class FxCopSensor implements Sensor {
     File reportFile;
     String reportPath = settings.getString(fxCopConf.reportPathPropertyKey());
     if (reportPath == null) {
-      File rulesetFile = new File(context.fileSystem().workDir(), "fxcop-sonarqube.ruleset");
-      writer.write(enabledRuleConfigKeys(context.activeRules()), rulesetFile);
-
-      reportFile = new File(context.fileSystem().workDir(), "fxcop-report.xml");
-
-      String target = null;
-      
-      if (settings.hasKey(fxCopConf.assemblyPropertyKey())){
-    	  target = settings.getString(fxCopConf.assemblyPropertyKey());
-      }
-      else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
-    	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
-    	  target = gen.generate(settings.getString(fxCopConf.slnFilePropertyKey()));
-      }
-      else { 
-    	  target = settings.getString(fxCopConf.projectFilePropertyKey());
-      }
-      
-      
-      
-      executor.execute(settings.getString(fxCopConf.fxCopCmdPropertyKey()), target,
-        rulesetFile, reportFile, settings.getInt(fxCopConf.timeoutPropertyKey()), settings.getBoolean(fxCopConf.aspnetPropertyKey()),
-        splitOnCommas(settings.getString(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.getString(fxCopConf.referencesPropertyKey())));
+      reportFile = executeFxCop(writer, executor, context, settings);
     } else {
       LOG.debug("Using the provided FxCop report" + reportPath);
       reportFile = new File(reportPath);
     }
 
-    for (FxCopIssue issue : parser.parse(reportFile)) {
+    parseReportFile(parser, context, reportFile);
+  }
+
+  private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Settings settings) {
+	File reportFile;
+	File rulesetFile = new File(context.fileSystem().workDir(), "fxcop-sonarqube.ruleset");
+      writer.write(enabledRuleConfigKeys(context.activeRules()), rulesetFile);
+
+      reportFile = new File(context.fileSystem().workDir(), "fxcop-report.xml");
+
+      String target = getTargetForSetting(settings);
+      
+      
+      executor.setExecutable(settings.getString(fxCopConf.fxCopCmdPropertyKey()));
+      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()));
+      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()));
+      
+      executor.execute(target,
+        rulesetFile, reportFile, 
+        splitOnCommas(settings.getString(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.getString(fxCopConf.referencesPropertyKey())));
+	return reportFile;
+  }
+
+  private void parseReportFile(FxCopReportParser parser, SensorContext context, File reportFile) {
+	for (FxCopIssue issue : parser.parse(reportFile)) {
       String absolutePath = getSourceFileAbsolutePath(issue);
 
       InputFile inputFile = null;
@@ -140,6 +142,22 @@ public class FxCopSensor implements Sensor {
 
       newIssue.save();
     }
+  }
+
+  private String getTargetForSetting(Settings settings) {
+	String target = null;
+      
+      if (settings.hasKey(fxCopConf.assemblyPropertyKey())){
+    	  target = settings.getString(fxCopConf.assemblyPropertyKey());
+      }
+      else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
+    	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+    	  target = gen.generate(settings.getString(fxCopConf.slnFilePropertyKey()));
+      }
+      else { 
+    	  target = settings.getString(fxCopConf.projectFilePropertyKey());
+      }
+	return target;
   }
 
   private static String createMessageLocation(String absolutePath, Integer line) {
