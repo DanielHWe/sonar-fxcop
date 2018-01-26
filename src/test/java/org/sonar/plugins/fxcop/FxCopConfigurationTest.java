@@ -191,6 +191,20 @@ public class FxCopConfigurationTest {
 
     new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
   }
+  
+  @Test
+  public void check_properties_fxcopcmd_property_not_found_slnFile() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("Cannot find the FxCopCmd executable");
+    thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
+    thrown.expectMessage("\"fooFxCopCmdPathKey\"");
+
+    Settings settings = new Settings();
+    settings.setProperty("fooSlnKey", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
+
+    new FxCopConfiguration("", "", "", "", "fooSlnKey", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+  }
 
   @Test
   public void check_properties_timeout_property_deprecated() {
@@ -204,20 +218,43 @@ public class FxCopConfigurationTest {
 
     assertThat(settings.getString(fxCopConf.timeoutPropertyKey())).isEqualTo("42");
   }
+  
+  @Test
+  public void check_properties_timeout_property_deprecated_sln() {
+    Settings settings = new Settings();
+    settings.setProperty("fooSlnKey", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
+
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "fooSlnKey", "fooFxCopCmdPathKey", "fooTimeoutKey", "", "", "", "");
+    fxCopConf.checkProperties(settings);
+
+    assertThat(settings.getString(fxCopConf.timeoutPropertyKey())).isEqualTo("42");
+  }
 
   @Test
   public void check_properties_report_assembly_path_not_found() {
     thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Cannot find the FxCop report");
-    thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
-    thrown.expectMessage("\"fooReportPathKey\"");
+    thrown.expectMessage("Cannot find the assembly");    
 
     Settings settings = new Settings();
-    settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
+    settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
     fxCopConf.checkProperties(settings);
   }
+  
+  @Test
+  public void check_properties_assembly_wildcard_path_not_found() {
+	    thrown.expect(IllegalArgumentException.class);
+	    thrown.expectMessage("Cannot find any assembly matching");    
+
+	    Settings settings = new Settings();
+	    settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop*").getAbsolutePath());
+
+	    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
+	    fxCopConf.checkProperties(settings);
+	  }
   
   @Test
   public void check_properties_report_project_path_not_found() {
@@ -236,14 +273,12 @@ public class FxCopConfigurationTest {
   @Test
   public void check_properties_sln_path_not_found() {
     thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("Cannot find the FxCop report");
-    thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
-    thrown.expectMessage("\"fooReportPathKey\"");
+    thrown.expectMessage("Cannot find the sln file");   
 
     Settings settings = new Settings();
-    settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
+    settings.setProperty("slnFilePath", new File("src/test/resources/FxCopConfigurationTest/sln-notfound.sln").getAbsolutePath());
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
     fxCopConf.checkProperties(settings);
   }
 
