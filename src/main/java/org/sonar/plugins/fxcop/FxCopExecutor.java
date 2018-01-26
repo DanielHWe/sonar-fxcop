@@ -31,8 +31,8 @@ import org.sonar.api.utils.log.Loggers;
 public class FxCopExecutor {
 
   private static final Logger LOG = Loggers.get(FxCopExecutor.class);
-  private static final String EXECUTABLE = "FxCopCmd.exe";
-  private String executable;
+  private static final String DEFAULT_EXECUTABLE = "FxCopCmd.exe";
+  private String fxCopExecutablePath;
   private int timeout;
   private boolean aspnet;
 
@@ -41,7 +41,7 @@ public class FxCopExecutor {
 	if (targetFile.toLowerCase().endsWith(".fxcop")) {
 	   targetFileArgument = "/project:" +targetFile;
 	}
-    Command command = Command.create(getExecutable(executable))
+    Command command = Command.create(getExecutable(fxCopExecutablePath))
       .addArgument(targetFileArgument)
       .addArgument("/ruleset:=" + rulesetFile.getAbsolutePath())
       .addArgument("/out:" + reportFile.getAbsolutePath())
@@ -69,22 +69,22 @@ public class FxCopExecutor {
     Preconditions.checkState((exitCode & 1) == 0,
       "The execution of \"{0}\" failed and returned {1} as exit code. "
       + "See http://msdn.microsoft.com/en-us/library/bb429400(v=vs.80).aspx for details.", 
-      executable, exitCode);
+      fxCopExecutablePath, exitCode);
   }
 
   /**
    * Handles deprecated property: "installDirectory", which gives the path to the directory only.
    */
   private static String getExecutable(String path) {
-    return path.endsWith(EXECUTABLE) ? path : new File(path, EXECUTABLE).getAbsolutePath();
+    return path.endsWith(DEFAULT_EXECUTABLE) ? path : new File(path, DEFAULT_EXECUTABLE).getAbsolutePath();
   }
 
 public String getExecutable() {
-	return executable;
+	return fxCopExecutablePath;
 }
 
 public void setExecutable(String executable) {
-	this.executable = executable;
+	this.fxCopExecutablePath = executable;
 }
 
 public int getTimeout() {

@@ -15,6 +15,8 @@ import org.junit.rules.ExpectedException;
 
 public class FxCopProjectGeneratorTest {
 	private static String TEST_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln";
+	private static String TEST_SLN_NO_EXITING_PROJECTS = "src/test/resources/FxCopConfigGeneratorTests/TestApp2.sln";
+	private static String TEST_SLN_EMPTY = "src/test/resources/FxCopConfigGeneratorTests/TestApp3.sln";
 	private static String TEST_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1.csproj";
 	private static String TEST_CSPROJ_EXE = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.csproj";
 	private static String TEST_DLL_RELEASE = "src/test/resources/bin/Release/TestLib1.dll";
@@ -72,6 +74,24 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(resultFileName).isNotEmpty();
 		  
 		  
+	  }
+	  
+	  @Test(expected = IllegalStateException.class)
+	  public void testGenerateNonExistingSlnFile() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  gen.generate("NotExisting.sln");
+	  }
+	  
+	  @Test(expected = IllegalStateException.class)
+	  public void testGenerateNonExistingCsprojFile() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  gen.generate(TEST_SLN_NO_EXITING_PROJECTS);
+	  }
+	  
+	  @Test(expected = IllegalArgumentException.class)
+	  public void testGenerateEmptySlnFile() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  gen.generate(TEST_SLN_EMPTY);
 	  }
 	  
 	  @Test
@@ -159,5 +179,12 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(file).endsWith("TestApp1.exe");
 		  assertThat(file).doesNotContain("/../");
 		  assertThat(file).doesNotContain("\\..\\");
+	  }
+	  
+	  @Test(expected = IllegalStateException.class)
+	  public void testCsprojNoBinary() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  gen.getDllPathFromCsProj(TEST_CSPROJ_EXE);		  
 	  }
 }

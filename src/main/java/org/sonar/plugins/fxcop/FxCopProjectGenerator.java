@@ -96,8 +96,7 @@ public class FxCopProjectGenerator {
 	    	   Matcher m = pattern.matcher(reader.readLine());
 	           if (m.find()) {        	   
 	        	   String file = Paths.get(parentDir, m.group(1)).toString();
-	        	   if (!(new File(file).exists())){
-	        		   reader.close();
+	        	   if (!(new File(file).exists())){	        		   
 	        		   LOG.error("Project File not '"+file+"' found for " + slnFileObj.getAbsolutePath());
 	        		   throw new IllegalStateException("Project File not found: " + file);
 	        	   }
@@ -146,8 +145,6 @@ public class FxCopProjectGenerator {
             tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             
-            
-            ;
             // send DOM to file
             tr.transform(new DOMSource(dom), 
                                  new StreamResult(fs));
