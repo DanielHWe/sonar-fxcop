@@ -49,9 +49,10 @@ public class FxCopExecutorTest {
 
 		    FxCopExecutor executor = new FxCopExecutor();
 		    executor.setExecutable("FxCopCmd.exe");
-		    executor.setAspnet(false);
+		    executor.setAspnet(true);
 		    executor.setTimeout(31);
 		    List<String> emptyList = new ArrayList<>();
+		    emptyList.add("/");
 		    
 		    executor.execute("myproj.fxcop", new File("rules"), new File("outreport.report"), emptyList, emptyList);
 		  }
