@@ -147,7 +147,7 @@ private String GgetSlnFileFromContextPath(File baseDir) {
 private File getSlnFromPath(File baseDir, FilenameFilter fileNameFilter, File newAltFile) {
 	File currentFile = newAltFile;
 	for (String f: baseDir.list(fileNameFilter)){
-		  if (currentFile==null) {
+		  if (currentFile==null||!currentFile.exists()) {
 			  currentFile=new File(baseDir, f);
 		  } else if (newAltFile.getAbsolutePath().toLowerCase().contains("test") || newAltFile.getAbsolutePath().toLowerCase().contains("sample")){
 			  currentFile=new File(baseDir, f);
