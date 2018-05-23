@@ -145,14 +145,15 @@ private String GgetSlnFileFromContextPath(File baseDir) {
 }
 
 private File getSlnFromPath(File baseDir, FilenameFilter fileNameFilter, File newAltFile) {
+	File currentFile = newAltFile;
 	for (String f: baseDir.list(fileNameFilter)){
-		  if (newAltFile==null) {
-			  newAltFile=new File(baseDir, f);
+		  if (currentFile==null) {
+			  currentFile=new File(baseDir, f);
 		  } else if (newAltFile.getAbsolutePath().toLowerCase().contains("test") || newAltFile.getAbsolutePath().toLowerCase().contains("sample")){
-			  newAltFile=new File(baseDir, f);
+			  currentFile=new File(baseDir, f);
 		  }
 	  }
-	return newAltFile;
+	return currentFile;
 }
 
   private String getSlnNameByProperty(SensorContext context, File baseDir) {
