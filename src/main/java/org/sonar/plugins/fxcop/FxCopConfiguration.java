@@ -36,6 +36,8 @@ public class FxCopConfiguration {
   private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
 private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
   private static final String DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY = "sonar.fxcop.timeoutMinutes";
+  private static final String MISSING_SCAN_DEFINITION_TEXT = "FxCop plugin missed the definition of what to scan. Please set one of folowing properties:"+
+  		"sonar.cs.fxcop.assembly, sonar.cs.fxcop.project, sonar.cs.fxcop.reportPath or sonar.cs.fxcop.slnFile";
   private static final Logger LOG = Loggers.get(FxCopExecutor.class);
 
   private final String languageKey;
@@ -50,6 +52,7 @@ private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop
   private final String directoriesPropertyKey;
   private final String referencesPropertyKey;
   private final String reportPathPropertyKey;
+private String alternativeSlnFile;
 
 
 public FxCopConfiguration(String languageKey, String repositoryKey, String assemblyPropertyKey, 
@@ -119,10 +122,26 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	      checkReportPathProperty(settings);
 	    } else {
 	    	if (!settings.hasKey(assemblyPropertyKey) && 
+	    		!settings.hasKey(projectFilePropertyKey)&& 
+	    		!settings.hasKey(slnFilePropertyKey)){
+	    		LOG.warn(MISSING_SCAN_DEFINITION_TEXT);
+	    		if (this.alternativeSlnFile != null && !this.alternativeSlnFile.isEmpty()) {
+	    			LOG.warn("Use default sln file found: " + this.alternativeSlnFile);
+	    			settings.appendProperty(slnFilePropertyKey, this.alternativeSlnFile);
+	    		} else {
+	    			LOG.error("No possible default found sln, please specify.");
+	    			throw new IllegalArgumentException(MISSING_SCAN_DEFINITION_TEXT);
+	    		}
+	    	}
+	    	
+	    	if (!settings.hasKey(assemblyPropertyKey) && 
 	    		settings.hasKey(projectFilePropertyKey)&& 
 	    		!settings.hasKey(slnFilePropertyKey)) 
 	    	{ 
-	    		return false; 
+	    		checkMandatoryProperties(settings); 
+	    		checkProjectFileProperty(settings);
+		        checkFxCopCmdPathProperty(settings);
+		        checkTimeoutProeprty(settings);
 	    	} 
 	    	else if (!settings.hasKey(assemblyPropertyKey) && 
 		    		!settings.hasKey(projectFilePropertyKey)&& 
@@ -278,5 +297,10 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 
 	    
 	  }
+
+  public void setAlternativeSln(String altSlnFile) {
+	this.alternativeSlnFile = altSlnFile;
+	
+  }
 
 }

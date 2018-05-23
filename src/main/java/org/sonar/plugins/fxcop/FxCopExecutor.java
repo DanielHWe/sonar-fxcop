@@ -60,6 +60,8 @@ public class FxCopExecutor {
       command.addArgument("/reference:" + reference);
     }
 
+    LOG.info("Start execute: " + command.toString());
+    
     int exitCode = CommandExecutor.create().execute(
       command,
       TimeUnit.MINUTES.toMillis(timeout));

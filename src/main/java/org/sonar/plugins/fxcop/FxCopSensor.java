@@ -22,10 +22,15 @@ package org.sonar.plugins.fxcop;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.Files;
+
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -36,6 +41,7 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.config.Settings;
+import org.sonar.api.resources.Directory;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -45,6 +51,7 @@ public class FxCopSensor implements Sensor {
   private static final String CUSTOM_RULE_KEY = "CustomRuleTemplate";
   private static final String CUSTOM_RULE_CHECK_ID_PARAMETER = "CheckId";
   private static final Logger LOG = Loggers.get(FxCopSensor.class);
+  private String altSlnFile;
 
   private final FxCopConfiguration fxCopConf;
 
@@ -66,6 +73,8 @@ public class FxCopSensor implements Sensor {
       LOG.debug("Skipping FxCop on non Windows OS");
       return;
     }
+    GetAlternativeSlnPath(context);
+    fxCopConf.setAlternativeSln(this.altSlnFile);
     if (!fxCopConf.checkProperties(context.settings())) {
       LOG.warn("Skipping FxCop, either the report file or the assembly is missing");
       return;
@@ -75,10 +84,12 @@ public class FxCopSensor implements Sensor {
 
   @VisibleForTesting
   void analyse(FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, SensorContext context) {
-    Settings settings = context.settings();
+	  
+	  
+	  Settings settings = context.settings();
 
     File reportFile;
-    String reportPath = settings.getString(fxCopConf.reportPathPropertyKey());
+    String reportPath = settings.getString(fxCopConf.reportPathPropertyKey());    
     if (reportPath == null) {
       reportFile = executeFxCop(writer, executor, context, settings);
     } else {
@@ -89,12 +100,105 @@ public class FxCopSensor implements Sensor {
     parseReportFile(parser, context, reportFile);
   }
 
+private void GetAlternativeSlnPath(SensorContext context) {
+	try {
+		  File baseDir = context.fileSystem().baseDir();
+		  LOG.info("Base Dir: " + baseDir);
+		  altSlnFile = getSlnNameByProperty(context, baseDir);
+		  if (altSlnFile == null) {
+			  altSlnFile = GgetSlnFileFromContextPath(baseDir);
+		  }
+	  } catch (Exception ex){
+		  LOG.warn("Unable to analyse working directory: " + ex.getMessage());
+	  }
+}
+
+private String GgetSlnFileFromContextPath(File baseDir) {
+	FilenameFilter fileNameFilter = new FilenameFilter() {
+		   
+	        @Override
+	        public boolean accept(File dir, String name) {
+	           if(name.lastIndexOf('.')>0) {
+	           
+	              // get last index for '.' char
+	              int lastIndex = name.lastIndexOf('.');
+	              
+	              // get extension
+	              String str = name.substring(lastIndex);
+	              
+	              // match path name extension
+	              if(str.equals(".sln")) {
+	                 return true;
+	              }
+	           }
+	           
+	           return false;
+	        }
+	     };
+	  
+	  File newAltFile = null;
+	  newAltFile = getSlnFromPath(baseDir, fileNameFilter, newAltFile);
+	  if (newAltFile==null){
+		  newAltFile = getSlnFromPath(baseDir.getParentFile(), fileNameFilter, newAltFile);
+	  }
+	  return newAltFile.getAbsolutePath();
+}
+
+private File getSlnFromPath(File baseDir, FilenameFilter fileNameFilter, File newAltFile) {
+	for (String f: baseDir.list(fileNameFilter)){
+		  if (newAltFile==null) {
+			  newAltFile=new File(baseDir, f);
+		  } else if (newAltFile.getAbsolutePath().toLowerCase().contains("test") || newAltFile.getAbsolutePath().toLowerCase().contains("sample")){
+			  newAltFile=new File(baseDir, f);
+		  }
+	  }
+	return newAltFile;
+}
+
+  private String getSlnNameByProperty(SensorContext context, File baseDir) {
+	  try {
+		String slnName = context.settings().getString("sonar.dotnet.visualstudio.solution.file");
+		if (slnName == null || slnName.isEmpty()){
+			LOG.info("sonar.dotnet.visualstudio.solution.file not set");
+			return null;
+		}
+		File slnFile = new File(slnName);
+		if (slnFile.exists()) {
+			return slnFile.getAbsolutePath();
+		}else {
+		  slnFile = new File(baseDir,slnName);
+		  if (slnFile.exists()) {			  
+			  return slnFile.getAbsolutePath();
+		  }else {
+			  LOG.warn("Not Found SLN: " + slnFile.getAbsolutePath());
+			  return null;
+		  }
+	    }
+	  }
+	  catch (Exception ex){
+		  LOG.warn("Error calculate SLN path by 'sonar.dotnet.visualstudio.solution.file': " + ex.getMessage());
+		  return null;
+	  }
+	  
+  }
+
   private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Settings settings) {
 	File reportFile;
-	File rulesetFile = new File(context.fileSystem().workDir(), "fxcop-sonarqube.ruleset");
+	String workDirPath = context.fileSystem().workDir().getAbsolutePath();
+	String projectName = settings.getString("sonar.projectName");
+	if (projectName!=null){
+		//workDirPath = workDirPath.replaceAll(projectName, "");
+		LOG.info("Project name: " + projectName);
+		File workDir = new File(workDirPath);
+		if (!workDir.exists()){
+			workDir.mkdirs();
+		}
+	}
+	
+	File rulesetFile = new File(workDirPath, "fxcop-sonarqube.ruleset");
       writer.write(enabledRuleConfigKeys(context.activeRules()), rulesetFile);
 
-      reportFile = new File(context.fileSystem().workDir(), "fxcop-report.xml");
+      reportFile = new File(workDirPath, "fxcop-report.xml");
 
       String target = getTargetForSetting(settings);
       
@@ -110,6 +214,7 @@ public class FxCopSensor implements Sensor {
   }
 
   private void parseReportFile(FxCopReportParser parser, SensorContext context, File reportFile) {
+	  int count = 0;
 	for (FxCopIssue issue : parser.parse(reportFile)) {
       String absolutePath = getSourceFileAbsolutePath(issue);
 
@@ -141,7 +246,9 @@ public class FxCopSensor implements Sensor {
       }
 
       newIssue.save();
+      count ++;
     }
+	LOG.info("FxCop found "+ count+" issue(s).");
   }
 
   private String getTargetForSetting(Settings settings) {

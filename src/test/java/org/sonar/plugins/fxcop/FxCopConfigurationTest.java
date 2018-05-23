@@ -20,6 +20,10 @@
 package org.sonar.plugins.fxcop;
 
 import java.io.File;
+import java.io.IOException;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,9 +35,22 @@ import static org.mockito.Mockito.when;
 
 public class FxCopConfigurationTest {
 
-  @Rule
+  private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCopConfigurationTest/fxcop-report.xml").getAbsolutePath();
+@Rule
   public ExpectedException thrown = ExpectedException.none();
 
+	@BeforeClass 
+	public static void onlyOnce() throws IOException {
+		File f = new File(CONFIG_FILE_PATH);
+		f.createNewFile();
+ }
+
+	@AfterClass
+	public static void onlyOnceCleanup() throws IOException {
+		File f = new File(CONFIG_FILE_PATH);
+		f.delete();
+ }
+	
   @Test
   public void test() {
     FxCopConfiguration fxCopConf = new FxCopConfiguration("cs", "cs-fxcop", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "fooAspnetKey", "fooDirectoriesKey",
@@ -96,7 +113,7 @@ public class FxCopConfigurationTest {
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
     when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
     when(settings.hasKey("fooFxCopReportPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopReportPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/fxcop-report.xml").getAbsolutePath());
+    when(settings.getString("fooFxCopReportPathKey")).thenReturn(CONFIG_FILE_PATH);
 
     new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey").checkProperties(settings);
   }
@@ -271,6 +288,16 @@ public class FxCopConfigurationTest {
   }
   
   @Test
+  public void check_properties_report_project() {
+    
+    Settings settings = new Settings();
+    settings.setProperty("fooReportPathKey", CONFIG_FILE_PATH);
+
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    fxCopConf.checkProperties(settings);
+  }
+  
+  @Test
   public void check_properties_sln_path_not_found() {
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Cannot find the sln file");   
@@ -282,5 +309,16 @@ public class FxCopConfigurationTest {
     fxCopConf.checkProperties(settings);
   }
 
+  @Test
+  public void check_properties_alternative_sln_no_pdb() {
+	  thrown.expect(IllegalArgumentException.class);
+	  thrown.expectMessage("Cannot find the .pdb file ");
+	  
+    Settings settings = new Settings();
+    
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    fxCopConf.setAlternativeSln("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    fxCopConf.checkProperties(settings);
+  }
 }
 
