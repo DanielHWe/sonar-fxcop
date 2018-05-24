@@ -136,7 +136,7 @@ private String GgetSlnFileFromContextPath(File baseDir) {
 	        }
 	     };
 	  
-	  File newAltFile = null;
+	  File newAltFile = new File("C:\\");
 	  newAltFile = getSlnFromPath(baseDir, fileNameFilter, newAltFile);
 	  if (newAltFile==null){
 		  newAltFile = getSlnFromPath(baseDir.getParentFile(), fileNameFilter, newAltFile);
@@ -161,7 +161,7 @@ private boolean isOldSlnTest(File newAltFile) {
 }
 
 private boolean isFileSet(File currentFile) {
-	return currentFile==null||!currentFile.exists();
+	return currentFile.isDirectory() && !currentFile.exists();
 }
 
   private String getSlnNameByProperty(SensorContext context, File baseDir) {
