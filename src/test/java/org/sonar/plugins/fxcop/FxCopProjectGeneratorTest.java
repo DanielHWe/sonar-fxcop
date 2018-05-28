@@ -17,11 +17,14 @@ public class FxCopProjectGeneratorTest {
 	private static String TEST_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln";
 	private static String TEST_SLN_NO_EXITING_PROJECTS = "src/test/resources/FxCopConfigGeneratorTests/TestApp2.sln";
 	private static String TEST_SLN_EMPTY = "src/test/resources/FxCopConfigGeneratorTests/TestApp3.sln";
+	private static String TEST_CORE_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppCore.sln";
 	private static String TEST_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1.csproj";
 	private static String TEST_CSPROJ_EXE = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.csproj";
+	private static String TEST_CORE_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibCore.csproj";
 	private static String TEST_DLL_RELEASE = "src/test/resources/bin/Release/TestLib1.dll";
 	private static String TEST_EXE_RELEASE = "src/test/resources/bin/Release/TestApp1.exe";
 	private static String TEST_DLL_DEBUG = "src/test/resources/bin/Debug/TestLib1.dll";
+	private static String TEST_CORE_DLL_DEBUG = "src/test/resources/FxCopConfigGeneratorTests/bin/Debug/netcoreapp2.0/TestLibCore.dll";
 	private static String TEST_EXE_DEBUG = "src/test/resources/bin/Debug/TestApp1.exe";
 	
 	
@@ -70,6 +73,22 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String resultFileName = gen.generate(TEST_SLN);
+		  
+		  assertThat(resultFileName).isNotEmpty();
+		  
+		  
+	  }
+	  
+	  @Test
+	  public void testGenerateCore() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_CORE_DLL_DEBUG);
+		  new File( binFile.getParent()).mkdirs();
+		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String resultFileName = gen.generate(TEST_CORE_SLN);
 		  
 		  assertThat(resultFileName).isNotEmpty();
 		  
@@ -130,6 +149,8 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(file).doesNotContain("\\..\\");
 	  }
 	  
+	  
+	  
 	  @Test
 	  public void testCsprojExeReleseScan() throws IOException {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
@@ -143,6 +164,24 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(file).isNotNull();
 		  assertThat(file).isNotEmpty();
 		  assertThat(file).endsWith("TestApp1.exe");
+		  assertThat(file).doesNotContain("/../");
+		  assertThat(file).doesNotContain("\\..\\");
+	  }
+	  
+	  @Test
+	  public void testCoreCsprojDllDebugScan() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_CORE_DLL_DEBUG);
+		  new File( binFile.getParent()).mkdirs();
+		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String file = gen.getDllPathFromCsProj(TEST_CORE_CSPROJ_DLL);
+		  
+		  assertThat(file).isNotNull();
+		  assertThat(file).isNotEmpty();
+		  assertThat(file).endsWith("TestLibCore.dll");
 		  assertThat(file).doesNotContain("/../");
 		  assertThat(file).doesNotContain("\\..\\");
 	  }

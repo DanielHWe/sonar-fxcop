@@ -136,7 +136,7 @@ private String GgetSlnFileFromContextPath(File baseDir) {
 	        }
 	     };
 	  
-	  File newAltFile = new File("C:\\");
+	  File newAltFile = new File(baseDir.getAbsolutePath());
 	  newAltFile = getSlnFromPath(baseDir, fileNameFilter, newAltFile);
 	  if (isFileSet(newAltFile)){
 		  newAltFile = getSlnFromPath(baseDir.getParentFile(), fileNameFilter, newAltFile);

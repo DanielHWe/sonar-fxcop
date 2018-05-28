@@ -19,16 +19,37 @@ public class CSharpProjectInfo {
 	static final Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
 	static final Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
 	static final Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\]+)</OutputPath>");
+	static final Pattern patternTargetFramework = Pattern.compile("<TargetFramework>([\\w\\-\\ \\.\\\\]+)</TargetFramework>");
 	
 	private String project = null;
 	private String name = null;
 	private String type = null;
+	private String targetFramework;
 	private List<String> paths = new ArrayList<>();
 	
 	CSharpProjectInfo(String project) throws IOException{
 		this.project = project;
 		scanProjectFile();
+		performOnNetCore();
 		checkAllRequiredValuesFound();
+	}
+
+	private void performOnNetCore() {
+		//Net core project files contain only non default settings, so set defaults if not set
+		if (targetFramework!=null && targetFramework.startsWith("netcoreapp")){
+			if (paths.isEmpty()) {
+				paths.add("bin\\debug\\netcoreapp2.0");
+				paths.add("bin\\release\\netcoreapp2.0");
+			}
+			if (type == null){
+				type = "Library";
+			}
+			if (name == null) {
+				File projectFile = new File(project);
+				name = projectFile.getName().replace(".csproj", "");
+			}
+		}
+		
 	}
 
 	private void checkAllRequiredValuesFound() {
@@ -63,6 +84,10 @@ public class CSharpProjectInfo {
 	           m = patternPath.matcher(currentLine);
 	           if (m.find()) {
 	        	   paths.add(convertPath(m.group(1)));	        	   
+	           }
+	           m = patternTargetFramework.matcher(currentLine);
+	           if (m.find()) {
+	        	   targetFramework = m.group(1);	        	   
 	           }
 	       }
 		} finally {
