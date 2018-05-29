@@ -18,6 +18,9 @@ public class FxCopProjectGeneratorTest {
 	private static String TEST_SLN_NO_EXITING_PROJECTS = "src/test/resources/FxCopConfigGeneratorTests/TestApp2.sln";
 	private static String TEST_SLN_EMPTY = "src/test/resources/FxCopConfigGeneratorTests/TestApp3.sln";
 	private static String TEST_CORE_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppCore.sln";
+	private static String TEST_NO_PATH_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppNoPath.sln";
+	private static String TEST_NO_TYPE_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppNoType.sln";
+	private static String TEST_NO_NAME_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppNoName.sln";
 	private static String TEST_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1.csproj";
 	private static String TEST_CSPROJ_EXE = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.csproj";
 	private static String TEST_CORE_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibCore.csproj";
@@ -92,6 +95,24 @@ public class FxCopProjectGeneratorTest {
 		  
 		  assertThat(resultFileName).isNotEmpty();
 		  
+		  
+	  }
+	  
+	  @Test(expected = IllegalArgumentException.class)
+	  public void testSlnNoPath() throws IOException {
+		  new CSharpProjectInfo(TEST_NO_PATH_SLN);
+		  
+	  }
+	  
+	  @Test(expected = IllegalArgumentException.class)
+	  public void testSlnNoType() throws IOException {
+		  new CSharpProjectInfo(TEST_NO_TYPE_SLN);
+		  
+	  }
+	  
+	  @Test(expected = IllegalArgumentException.class)
+	  public void testSlnNoName() throws IOException {
+		  new CSharpProjectInfo(TEST_NO_NAME_SLN);
 		  
 	  }
 	  

@@ -100,7 +100,7 @@ public class FxCopSensor implements Sensor {
     parseReportFile(parser, context, reportFile);
   }
 
-private void GetAlternativeSlnPath(SensorContext context) {
+String GetAlternativeSlnPath(SensorContext context) {
 	try {
 		  File baseDir = context.fileSystem().baseDir();
 		  LOG.info("Base Dir: " + baseDir);
@@ -108,9 +108,12 @@ private void GetAlternativeSlnPath(SensorContext context) {
 		  if (altSlnFile == null) {
 			  altSlnFile = GgetSlnFileFromContextPath(baseDir);
 		  }
+		  return altSlnFile;
 	  } catch (Exception ex){
 		  LOG.warn("Unable to analyse working directory: " + ex.getMessage());
+		  return null;
 	  }
+	
 }
 
 private String GgetSlnFileFromContextPath(File baseDir) {

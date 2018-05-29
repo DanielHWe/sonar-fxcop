@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>unknown</TargetFramework>
+    <AssemblyName>TestLib1</AssemblyName>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+</Project>

@@ -29,11 +29,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
+import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.Settings;
 import org.sonar.api.rule.RuleKey;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +66,40 @@ public class FxCopSensorTest {
     assertThat(descriptor.name()).isEqualTo("FxCop (foo)");
   }
 
+  @Test
+  public void testAlternativeSln() {    
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("."));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    
+    String res = sensor.GetAlternativeSlnPath(context);
+    
+    assertThat(res).isNotEmpty();
+    assertThat(res).contains("TestApp1.sln");
+  }
+  
+  @Test
+  public void testAlternativeSlnPropertyWrong() {    
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/NotExists.sln");
+    
+    String res = sensor.GetAlternativeSlnPath(context);
+    
+    assertThat(res).isNotEmpty();
+    assertThat(res).contains("TestApp");
+  }
+  
   @Test
   public void analyze_execute_fxcop() throws Exception {
     Path baseDir = temp.newFolder().toPath();
