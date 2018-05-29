@@ -101,6 +101,41 @@ public class FxCopSensorTest {
   }
   
   @Test
+  public void testAlternativeSlnError() {    
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenThrow(new IllegalArgumentException("FAKE"));
+    when(fs.baseDir()).thenReturn(new File("."));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    
+    String res = sensor.GetAlternativeSlnPath(context);
+    
+    assertThat(res).isNull();
+ }
+  
+  @Test
+  public void testExecute() {    
+	  thrown.expect(IllegalArgumentException.class);
+	    thrown.expectMessage("Cannot find the FxCop report");
+	  
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    when(settings.getString("sonar.cs.fxcop.report")).thenReturn("dummy.rep");
+    when(settings.hasKey("sonar.cs.fxcop.report")).thenReturn(true);
+    
+    sensor.execute(context);
+  }
+  
+  @Test
   public void analyze_execute_fxcop() throws Exception {
     Path baseDir = temp.newFolder().toPath();
     SensorContextTester context = SensorContextTester.create(baseDir);
