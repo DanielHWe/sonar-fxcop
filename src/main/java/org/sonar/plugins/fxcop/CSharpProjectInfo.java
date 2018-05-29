@@ -53,7 +53,7 @@ public class CSharpProjectInfo {
 	}
 
 	private void checkAllRequiredValuesFound() {
-		if (paths == null) {
+		if (paths == null || paths.isEmpty()) {
 	    	LOG.warn("No output path found for '"+project+"'.");
 	    	throw new IllegalArgumentException("No output path found for '"+project+"'.");
 	    }
@@ -61,7 +61,7 @@ public class CSharpProjectInfo {
 	    	LOG.warn("No output type found for '"+project+"'.");
 	    	throw new IllegalArgumentException("No output type found for '"+project+"'.");
 	    }
-	    if (name == null) {
+	    if (name == null || name.isEmpty()) {
 	    	LOG.warn("No output name found for '"+project+"'.");
 	    	throw new IllegalArgumentException("No output name found for '"+project+"'.");
 	    }
