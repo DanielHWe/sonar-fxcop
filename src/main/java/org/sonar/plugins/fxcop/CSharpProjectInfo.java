@@ -38,8 +38,8 @@ public class CSharpProjectInfo {
 		//Net core project files contain only non default settings, so set defaults if not set
 		if (targetFramework!=null && targetFramework.startsWith("netcoreapp")){
 			if (paths.isEmpty()) {
-				paths.add(convertPath("bin\\debug\\netcoreapp2.0"));
-				paths.add(convertPath("bin\\release\\netcoreapp2.0"));
+				paths.add(convertPath("bin\\Debug\\netcoreapp2.0"));
+				paths.add(convertPath("bin\\Release\\netcoreapp2.0"));
 			}
 			if (type == null){
 				type = "Library";
