@@ -131,6 +131,23 @@ public class FxCopConfigurationTest {
 
     new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
   }
+  
+  @Test
+  public void check_properties_with_project_property_is_set() {
+	  thrown.expect(IllegalArgumentException.class);
+	    thrown.expectMessage("Cannot find the project");
+    Settings settings = mock(Settings.class);
+    String projectProperty = "fooAssemblyKey";
+    settings.setProperty("projectFileProperty", "fooAssemblyKey");
+    when(settings.hasKey(projectProperty)).thenReturn(true);
+    when(settings.getString(projectProperty)).thenReturn("src/test/resources/FxCopConfigurationTest/abc.fxCopProject");
+    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
+    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+
+
+    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings)).isFalse();
+  }
 
 
 
@@ -171,6 +188,8 @@ public class FxCopConfigurationTest {
     FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "", "");
     assertThat(config.checkProperties(settings)).isFalse();
   }
+  
+  
   
   @Test
   public void check_properties_assembly_property_pdb_not_found() {

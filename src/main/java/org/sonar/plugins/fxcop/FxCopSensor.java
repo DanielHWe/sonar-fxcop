@@ -73,14 +73,18 @@ public class FxCopSensor implements Sensor {
       LOG.debug("Skipping FxCop on non Windows OS");
       return;
     }
-    GetAlternativeSlnPath(context);
+    executeImpl(context);
+  }
+
+void executeImpl(SensorContext context) {
+	GetAlternativeSlnPath(context);
     fxCopConf.setAlternativeSln(this.altSlnFile);
     if (!fxCopConf.checkProperties(context.settings())) {
       LOG.warn("Skipping FxCop, either the report file or the assembly is missing");
       return;
     }
     analyse(new FxCopRulesetWriter(), new FxCopReportParser(), new FxCopExecutor(), context);
-  }
+}
 
   @VisibleForTesting
   void analyse(FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, SensorContext context) {
