@@ -251,6 +251,10 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 
     String value = settings.getString(fxCopCmdPropertyKey);
 
+    Preconditions.checkArgument(
+    		value != null,
+    	      "FxCopCmd executable is not set \"" + PROVIDED_BY_THE_PROPERTY + fxCopCmdPropertyKey + "\".");
+    
     File file = new File(value);
     Preconditions.checkArgument(
       file.isFile(),

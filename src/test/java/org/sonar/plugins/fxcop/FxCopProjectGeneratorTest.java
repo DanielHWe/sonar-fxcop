@@ -100,19 +100,19 @@ public class FxCopProjectGeneratorTest {
 	  
 	  @Test(expected = IllegalArgumentException.class)
 	  public void testSlnNoPath() throws IOException {
-		  new CSharpProjectInfo(TEST_NO_PATH_SLN);
+		  new CSharpProjectInfo(TEST_NO_PATH_SLN.replace(".sln", ".csproj").replace("TestApp", "TestLib"));
 		  
 	  }
 	  
 	  @Test(expected = IllegalArgumentException.class)
 	  public void testSlnNoType() throws IOException {
-		  new CSharpProjectInfo(TEST_NO_TYPE_SLN);
+		  new CSharpProjectInfo(TEST_NO_TYPE_SLN.replace(".sln", ".csproj").replace("TestApp", "TestLib"));
 		  
 	  }
 	  
 	  @Test(expected = IllegalArgumentException.class)
 	  public void testSlnNoName() throws IOException {
-		  new CSharpProjectInfo(TEST_NO_NAME_SLN);
+		  new CSharpProjectInfo(TEST_NO_NAME_SLN.replace(".sln", ".csproj").replace("TestApp", "TestLib"));
 		  
 	  }
 	  

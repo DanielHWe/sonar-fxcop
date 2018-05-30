@@ -115,7 +115,10 @@ public class FxCopConfigurationTest {
     when(settings.hasKey("fooFxCopReportPathKey")).thenReturn(true);
     when(settings.getString("fooFxCopReportPathKey")).thenReturn(CONFIG_FILE_PATH);
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey").checkProperties(settings);
+    FxCopConfiguration config = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey");
+    
+    config.checkProperties(settings);
+    config.setAlternativeSln("abc");
   }
 
   @Test
@@ -179,6 +182,20 @@ public class FxCopConfigurationTest {
     Settings settings = mock(Settings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll").getAbsolutePath());
+
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings);
+  }
+  
+  @Test
+  public void check_properties_assembly_property_null() {
+    thrown.expect(IllegalArgumentException.class);
+    thrown.expectMessage("The property");
+    thrown.expectMessage("is not set");
+    thrown.expectMessage("\'fooAssemblyKey\'");
+
+    Settings settings = mock(Settings.class);
+    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
+    when(settings.getString("fooAssemblyKey")).thenReturn(null);
 
     new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings);
   }
@@ -295,10 +312,12 @@ public class FxCopConfigurationTest {
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
     fxCopConf.checkProperties(settings);
+    
+    assertThat(fxCopConf.projectFilePropertyKey()).isEqualTo("fooProjectPath");
   }
   
   @Test
-  public void check_properties_sln_path_not_found() {
+  public void check_properties_sln_path() {
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Cannot find the sln file");   
 
@@ -307,6 +326,19 @@ public class FxCopConfigurationTest {
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
     fxCopConf.checkProperties(settings);
+  }
+  
+  @Test
+  public void check_properties_sln_path_not_found() {   
+
+    Settings settings = new Settings();
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());    
+    settings.setProperty("slnFilePath", new File("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln").getAbsolutePath());
+
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
+    
+    fxCopConf.checkProperties(settings);
+    assertThat(fxCopConf.slnFilePropertyKey()).isEqualTo("slnFilePath");
   }
 
   @Test

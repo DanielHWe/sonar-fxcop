@@ -101,6 +101,40 @@ public class FxCopSensorTest {
   }
   
   @Test
+  public void testAlternativeSlnPropertyEmpty() {    
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("");
+    
+    String res = sensor.GetAlternativeSlnPath(context);
+    
+    assertThat(res).isNotEmpty();
+    assertThat(res).contains("TestApp");
+  }
+  
+  @Test
+  public void testAlternativeSlnPropertyExeption() {    
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    Settings settings = mock(Settings.class);
+    when(context.settings()).thenReturn(settings);
+    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
+    
+    String res = sensor.GetAlternativeSlnPath(context);
+    
+    assertThat(res).isNotEmpty();
+    assertThat(res).contains("TestApp");
+  }
+  
+  @Test
   public void testAlternativeSlnError() {    
     FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "", "", "", "", "", "", ""));
     SensorContext context = mock(SensorContext.class);
