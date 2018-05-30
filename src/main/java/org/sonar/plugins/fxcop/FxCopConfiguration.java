@@ -188,6 +188,7 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 
   private void checkWildcardAssemblyPath(String assemblyPath) {
 	  int lastSlash = assemblyPath.lastIndexOf('/');
+	  if (lastSlash <= 0) lastSlash = assemblyPath.lastIndexOf('\\');
 	  String folderPath = lastSlash > 0 ?  assemblyPath.substring(0, lastSlash) : "./";
 	  String fileName = lastSlash > 0 ?  assemblyPath.substring(lastSlash+1) : assemblyPath;
 		
@@ -289,9 +290,6 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	  }
   
   private void checkSlnProperty(Settings settings) {
-		if (!settings.hasKey(slnFilePropertyKey)){
-			return;
-		}
 	    String slnFilePath = settings.getString(slnFilePropertyKey);
 
 	    File slnFile = new File(slnFilePath);

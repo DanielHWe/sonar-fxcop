@@ -35,7 +35,8 @@ import static org.mockito.Mockito.when;
 
 public class FxCopConfigurationTest {
 
-  private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCopConfigurationTest/fxcop-report.xml").getAbsolutePath();
+  private static final String MY_LIBRARY = "src/test/resources/FxCopConfigurationTest/MyLibrary";
+private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCopConfigurationTest/fxcop-report.xml").getAbsolutePath();
 @Rule
   public ExpectedException thrown = ExpectedException.none();
 
@@ -125,7 +126,7 @@ public class FxCopConfigurationTest {
   public void check_properties_without_assembly_extension() {
     Settings settings = mock(Settings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibrary").getAbsolutePath());
+    when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY).getAbsolutePath() + "*");
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
     when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
@@ -133,7 +134,18 @@ public class FxCopConfigurationTest {
   }
   
   @Test
-  public void check_properties_with_project_property_is_set() {
+  public void check_properties_without_assembly_full_name() throws IOException {
+    Settings settings = mock(Settings.class);
+    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
+    when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY + ".dll").getAbsolutePath());
+    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
+    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+  }
+  
+  @Test
+  public void check_properties_with_project_property_is_set_wrong() {
 	  thrown.expect(IllegalArgumentException.class);
 	    thrown.expectMessage("Cannot find the project");
     Settings settings = mock(Settings.class);
@@ -145,8 +157,24 @@ public class FxCopConfigurationTest {
     when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "", "");
+    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
     assertThat(config.checkProperties(settings)).isFalse();
+  }
+  
+  @Test
+  public void check_properties_with_project_property_is_set() {
+	  
+    Settings settings = mock(Settings.class);
+    String projectProperty = "fooAssemblyKey";
+    settings.setProperty("projectFileProperty", "fooAssemblyKey");
+    when(settings.hasKey(projectProperty)).thenReturn(true);
+    when(settings.getString(projectProperty)).thenReturn("src/test/resources/FxCopConfigurationTest/MyLibrary.fxCopProj");
+    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
+    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+
+
+    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
+    assertThat(config.checkProperties(settings)).isTrue();
   }
 
 

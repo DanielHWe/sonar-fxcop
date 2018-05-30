@@ -168,7 +168,7 @@ private boolean isOldSlnTest(File newAltFile) {
 }
 
 private boolean isFileSet(File currentFile) {
-	return currentFile.isDirectory() && !currentFile.exists();
+	return currentFile.isDirectory() || !currentFile.exists();
 }
 
   private String getSlnNameByProperty(SensorContext context, File baseDir) {
