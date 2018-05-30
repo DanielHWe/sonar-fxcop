@@ -117,9 +117,11 @@ public class FxCopSensorTest {
  }
   
   @Test
-  public void testExecute() {    
-	  thrown.expect(IllegalArgumentException.class);
+  public void testExecute() {  
+	  if (System.getProperty("os.name").startsWith("Windows")) {
+		  thrown.expect(IllegalArgumentException.class);
 	    thrown.expectMessage("Cannot find the FxCop report");
+	  }
 	  
     FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
     SensorContext context = mock(SensorContext.class);
