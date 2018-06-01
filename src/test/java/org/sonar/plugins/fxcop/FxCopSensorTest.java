@@ -140,7 +140,9 @@ public class FxCopSensorTest {
     SensorContext context = mock(SensorContext.class);
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
-    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/bin"));
+    File binFolder = new File("src/test/resources/FxCopConfigGeneratorTests/bin");
+    if (!binFolder.exists()) binFolder.mkdir();
+    when(fs.baseDir()).thenReturn(binFolder);
     Settings settings = mock(Settings.class);
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
