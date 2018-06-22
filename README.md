@@ -66,7 +66,40 @@ Create a file called SonarQube.Analysis.xml, containing at minimum sonar.cs.fxco
 <SonarQubeAnalysisProperties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
     <Property Name="sonar.cs.fxcop.fxCopCmdPath">C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe</Property>
     <Property Name="sonar.cs.fxcop.directory">\bin\debug\</Property>
-    <Property Name="sonar.cs.fxcop.slnFile">\bin\debug\MyProject.sln</Property>
+    <Property Name="sonar.cs.fxcop.slnFile">MyProject.sln</Property>
+</SonarQubeAnalysisProperties>
+```
+
+use /s to set the addditional xml file 
+
+SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /s:"C:\projects\MyDll\SonarQube.Analysis.xml"
+
+msbuild /t:Rebuild MyProject.sln
+
+SonarQube.Scanner.MSBuild.exe end
+
+### Scan on base of an FxCop project file
+
+It is possible to create a project file with the FxCop gui and then use this for the scan by parameter sonar.cs.fxcop.project.
+
+**__Example:__**
+
+SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_key" /d:"sonar.cs.fxcop.project=MyFxCopProject.project" /d:"sonar.cs.fxcop.fxCopCmdPath=C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe" /d:"sonar.cs.fxcop.directory=bin\debug\"
+
+msbuild /t:Rebuild MyProject.sln
+
+SonarQube.Scanner.MSBuild.exe end
+
+**__Example with SonarQube.Analysis.xml:__**
+
+Create a file called SonarQube.Analysis.xml, containing at minimum sonar.cs.fxcop.slnFile, sonar.cs.fxcop.fxCopCmdPath and sonar.cs.fxcop.directory.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<SonarQubeAnalysisProperties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+    <Property Name="sonar.cs.fxcop.fxCopCmdPath">C:/Program Files (x86)/Microsoft Visual Studio 14.0/Team Tools/Static Analysis Tools/FxCop/FxCopCmd.exe</Property>
+    <Property Name="sonar.cs.fxcop.directory">\bin\debug\</Property>
+    <Property Name="sonar.cs.fxcop.project">MyFxCopProject.project</Property>
 </SonarQubeAnalysisProperties>
 ```
 
