@@ -201,15 +201,7 @@ private boolean isFileSet(File currentFile) {
   private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Settings settings) {
 	File reportFile;
 	String workDirPath = context.fileSystem().workDir().getAbsolutePath();
-	String projectName = settings.getString("sonar.projectName");
-	if (projectName!=null){
-		//workDirPath = workDirPath.replaceAll(projectName, "");
-		LOG.info("Project name: " + projectName);
-		File workDir = new File(workDirPath);
-		if (!workDir.exists()){
-			workDir.mkdirs();
-		}
-	}
+	workDirPath = TrimWorkdir(settings, workDirPath);
 	
 	File rulesetFile = new File(workDirPath, "fxcop-sonarqube.ruleset");
       writer.write(enabledRuleConfigKeys(context.activeRules()), rulesetFile);
@@ -228,6 +220,20 @@ private boolean isFileSet(File currentFile) {
         splitOnCommas(settings.getString(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.getString(fxCopConf.referencesPropertyKey())));
 	return reportFile;
   }
+
+private String TrimWorkdir(Settings settings, String workDirPath) {
+	String projectKey = settings.getString("sonar.projectKey");
+	if (projectKey!=null && !projectKey.isEmpty() /*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
+		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':')));
+		LOG.info("Project key: " + projectKey);
+		LOG.info("Work Dir: " + workDirPath);
+		File workDir = new File(workDirPath);
+		if (!workDir.exists()){
+			workDir.mkdirs();
+		}
+	}
+	return workDirPath;
+}
 
   private void parseReportFile(FxCopReportParser parser, SensorContext context, File reportFile) {
 	  int count = 0;

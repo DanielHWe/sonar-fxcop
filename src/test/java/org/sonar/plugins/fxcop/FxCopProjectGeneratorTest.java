@@ -82,7 +82,7 @@ public class FxCopProjectGeneratorTest {
 		  
 	  }
 	  
-	  @Test
+	  @Test(expected = IllegalArgumentException.class)
 	  public void testGenerateCore() throws IOException {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
 		  
@@ -92,8 +92,8 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
 		  
 		  String resultFileName = gen.generate(TEST_CORE_SLN);
-		  
-		  assertThat(resultFileName).isNotEmpty();
+		  //No .net Core support in the moment
+		  //assertThat(resultFileName).isNotEmpty();
 		  
 		  
 	  }
@@ -200,11 +200,12 @@ public class FxCopProjectGeneratorTest {
 		  
 		  String file = gen.getDllPathFromCsProj(TEST_CORE_CSPROJ_DLL);
 		  
-		  assertThat(file).isNotNull();
+		  assertThat(file).isNull();
+		  /* No .Net Core support in the moment
 		  assertThat(file).isNotEmpty();
 		  assertThat(file).endsWith("TestLibCore.dll");
 		  assertThat(file).doesNotContain("/../");
-		  assertThat(file).doesNotContain("\\..\\");
+		  assertThat(file).doesNotContain("\\..\\");*/
 	  }
 	  
 	  @Test

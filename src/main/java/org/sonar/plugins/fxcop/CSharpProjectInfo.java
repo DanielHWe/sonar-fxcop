@@ -33,6 +33,11 @@ public class CSharpProjectInfo {
 		performOnNetCore();
 		checkAllRequiredValuesFound();
 	}
+	
+	public boolean IsDotNetCore(){
+		if (targetFramework==null)return false;
+		return targetFramework.toLowerCase().contains("netcoreapp");
+	}
 
 	private void performOnNetCore() {
 		//Net core project files contain only non default settings, so set defaults if not set
@@ -40,13 +45,18 @@ public class CSharpProjectInfo {
 			if (paths.isEmpty()) {
 				paths.add(convertPath("bin\\Debug\\netcoreapp2.0"));
 				paths.add(convertPath("bin\\Release\\netcoreapp2.0"));
+				paths.add(convertPath("bin\\Debug\\netcoreapp2.1"));
+				paths.add(convertPath("bin\\Release\\netcoreapp2.1"));
+				LOG.debug("Set Outputpath to default");
 			}
 			if (type == null){
 				type = "Library";
+				LOG.debug("Set OutputType to default (Library)");
 			}
 			if (name == null) {
 				File projectFile = new File(project);
 				name = projectFile.getName().replace(".csproj", "");
+				LOG.debug("Set AssemblyName to default ("+name+")");
 			}
 		}
 		
@@ -76,18 +86,23 @@ public class CSharpProjectInfo {
 	    	   Matcher m = patternType.matcher(currentLine);
 	           if (m.find()) {
 	        	   type = (m.group(1));
+	        	   LOG.debug("Found OutputType ("+type+")");
 	           }
 	           m = patternName.matcher(currentLine);
 	           if (m.find()) {
 	        	   name = (m.group(1));
+	        	   LOG.debug("Found AssemblyName ("+name+")");
 	           }
 	           m = patternPath.matcher(currentLine);
 	           if (m.find()) {
-	        	   paths.add(convertPath(m.group(1)));	        	   
+	        	   String path = convertPath(m.group(1));
+	        	   paths.add(path);
+	        	   LOG.debug("Found OutputPath ("+path+")");
 	           }
 	           m = patternTargetFramework.matcher(currentLine);
 	           if (m.find()) {
-	        	   targetFramework = m.group(1);	        	   
+	        	   targetFramework = m.group(1);	
+	        	   LOG.debug("Found TargetFramework ("+targetFramework+")");
 	           }
 	       }
 		} finally {

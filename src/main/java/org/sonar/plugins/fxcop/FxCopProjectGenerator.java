@@ -62,7 +62,8 @@ public class FxCopProjectGenerator {
 
 	private void addProjectAssemblyIfExists(List<String> targetFileList, String project) throws IOException {
 		try {
-			targetFileList.add(getDllPathFromCsProj(project));
+			String proj = getDllPathFromCsProj(project); 
+			if (proj != null) targetFileList.add(proj);
 		} catch (IllegalArgumentException iae){
 			LOG.warn("Ignore '"+project+"' due to parsing error.");
 		}
@@ -76,6 +77,10 @@ public class FxCopProjectGenerator {
 		//Pattern.matches("<OutputType>(\\w+)</OutputType>", input)
 		   
 		CSharpProjectInfo projectInfo = new CSharpProjectInfo(project);
+		if (projectInfo.IsDotNetCore()) {
+			LOG.warn(".net core is not supported by FxCop - project " + project + " ignored.");
+			return null;
+		}
 		return projectInfo.getDllPathFromExistingBinary();
 	    
 	}
