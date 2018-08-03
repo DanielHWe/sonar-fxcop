@@ -221,10 +221,10 @@ private boolean isFileSet(File currentFile) {
 	return reportFile;
   }
 
-private String TrimWorkdir(Settings settings, String workDirPath) {
+public static String TrimWorkdir(Settings settings, String workDirPath) {
 	String projectKey = settings.getString("sonar.projectKey");
 	if (projectKey!=null && !projectKey.isEmpty() && projectKey.indexOf(':') > 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
-		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':')));
+		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':'))).replace(":", "");
 		LOG.info("Project key: " + projectKey);
 		LOG.info("Work Dir: " + workDirPath);
 		File workDir = new File(workDirPath);
