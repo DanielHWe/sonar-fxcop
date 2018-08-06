@@ -22,7 +22,6 @@ package org.sonar.plugins.fxcop;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -30,7 +29,6 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.ActiveRule;
@@ -41,7 +39,6 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.config.Settings;
-import org.sonar.api.resources.Directory;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -201,7 +198,7 @@ private boolean isFileSet(File currentFile) {
   private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Settings settings) {
 	File reportFile;
 	String workDirPath = context.fileSystem().workDir().getAbsolutePath();
-	workDirPath = TrimWorkdir(settings, workDirPath);
+	workDirPath = trimWorkdir(settings, workDirPath);
 	
 	File rulesetFile = new File(workDirPath, "fxcop-sonarqube.ruleset");
       writer.write(enabledRuleConfigKeys(context.activeRules()), rulesetFile);
@@ -221,9 +218,9 @@ private boolean isFileSet(File currentFile) {
 	return reportFile;
   }
 
-public static String TrimWorkdir(Settings settings, String workDirPath) {
+public static String trimWorkdir(Settings settings, String workDirPath) {
 	String projectKey = settings.getString("sonar.projectKey");
-	if (projectKey!=null && !projectKey.isEmpty() && projectKey.indexOf(':') > 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
+	if (projectKey!=null && !projectKey.isEmpty() && projectKey.indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
 		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':'))).replace(":", "");
 		LOG.info("Project key: " + projectKey);
 		LOG.info("Work Dir: " + workDirPath);

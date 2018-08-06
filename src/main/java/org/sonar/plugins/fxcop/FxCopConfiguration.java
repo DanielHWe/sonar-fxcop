@@ -121,52 +121,68 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	    if (settings.hasKey(reportPathPropertyKey)) {
 	      checkReportPathProperty(settings);
 	    } else {
-	    	if (!settings.hasKey(assemblyPropertyKey) && 
-	    		!settings.hasKey(projectFilePropertyKey)&& 
-	    		!settings.hasKey(slnFilePropertyKey)){
-	    		LOG.warn(MISSING_SCAN_DEFINITION_TEXT);
-	    		if (this.alternativeSlnFile != null && !this.alternativeSlnFile.isEmpty()) {
-	    			LOG.warn("Use default sln file found: " + this.alternativeSlnFile);
-	    			settings.appendProperty(slnFilePropertyKey, this.alternativeSlnFile);
-	    		} else {
-	    			LOG.error("No possible default found sln, please specify.");
-	    			throw new IllegalArgumentException(MISSING_SCAN_DEFINITION_TEXT);
-	    		}
-	    	}
-	    	
-	    	if (!settings.hasKey(assemblyPropertyKey) && 
-	    		settings.hasKey(projectFilePropertyKey)&& 
-	    		!settings.hasKey(slnFilePropertyKey)) 
-	    	{ 
-	    		checkMandatoryProperties(settings); 
-	    		checkProjectFileProperty(settings);
-		        checkFxCopCmdPathProperty(settings);
-		        checkTimeoutProeprty(settings);
-	    	} 
-	    	else if (!settings.hasKey(assemblyPropertyKey) && 
-		    		!settings.hasKey(projectFilePropertyKey)&& 
-		    		settings.hasKey(slnFilePropertyKey)) 
-	    	{ 
-	    		checkMandatoryProperties(settings);
-		        checkSlnProperty(settings);
-		        checkProjectFileProperty(settings);
-		        checkFxCopCmdPathProperty(settings);
-		        checkTimeoutProeprty(settings);
-	    	} 
-	    	else {
-		      checkMandatoryProperties(settings);
-		      checkAssemblyProperty(settings);
-		      checkProjectFileProperty(settings);
-		      checkFxCopCmdPathProperty(settings);
-		      checkTimeoutProeprty(settings);
-	    	}
+	    	checkScanProperties(settings);
 	    }
 	    return true;
 	  }
+
+private void checkScanProperties(Settings settings) {
+	if (isNoScanOptionSet(settings)){
+		LOG.warn(MISSING_SCAN_DEFINITION_TEXT);
+		if (this.alternativeSlnFile != null && !this.alternativeSlnFile.isEmpty()) {
+			LOG.warn("Use default sln file found: " + this.alternativeSlnFile);
+			settings.appendProperty(slnFilePropertyKey, this.alternativeSlnFile);
+		} else {
+			LOG.error("No possible default found sln, please specify.");
+			throw new IllegalArgumentException(MISSING_SCAN_DEFINITION_TEXT);
+		}
+	}
+	
+	if (isProjectFileScanOptionSet(settings)) 
+	{ 
+		checkMandatoryProperties(settings); 
+		checkProjectFileProperty(settings);
+	    checkFxCopCmdPathProperty(settings);
+	    checkTimeoutProeprty(settings);
+	} 
+	else if (isSolutionFileScanOptionSet(settings)) 
+	{ 
+		checkMandatoryProperties(settings);
+	    checkSlnProperty(settings);
+	    checkProjectFileProperty(settings);
+	    checkFxCopCmdPathProperty(settings);
+	    checkTimeoutProeprty(settings);
+	} 
+	else {
+	  checkMandatoryProperties(settings);
+	  checkAssemblyProperty(settings);
+	  checkProjectFileProperty(settings);
+	  checkFxCopCmdPathProperty(settings);
+	  checkTimeoutProeprty(settings);
+	}
+}
+
+private boolean isSolutionFileScanOptionSet(Settings settings) {
+	return !settings.hasKey(assemblyPropertyKey) && 
+			!settings.hasKey(projectFilePropertyKey)&& 
+			settings.hasKey(slnFilePropertyKey);
+}
+
+private boolean isProjectFileScanOptionSet(Settings settings) {
+	return !settings.hasKey(assemblyPropertyKey) && 
+		settings.hasKey(projectFilePropertyKey)&& 
+		!settings.hasKey(slnFilePropertyKey);
+}
+
+private boolean isNoScanOptionSet(Settings settings) {
+	return !settings.hasKey(assemblyPropertyKey) && 
+		!settings.hasKey(projectFilePropertyKey)&& 
+		!settings.hasKey(slnFilePropertyKey);
+}
   
   private void checkMandatoryProperties(Settings settings) {
 	 
-	    if (!settings.hasKey(assemblyPropertyKey) && !settings.hasKey(projectFilePropertyKey) && !settings.hasKey(slnFilePropertyKey)) {
+	    if (isNoScanOptionSet(settings)) {
 	      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
 	        "Verify that you are using the latest version of the SonarQube Scanner for MSBuild, and if you do, please report a bug. " +
 	        "In the short term, you can disable all FxCop rules from your quality profile to get rid of this error.");

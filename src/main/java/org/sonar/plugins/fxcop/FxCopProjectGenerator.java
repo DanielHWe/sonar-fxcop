@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -77,7 +78,7 @@ public class FxCopProjectGenerator {
 		//Pattern.matches("<OutputType>(\\w+)</OutputType>", input)
 		   
 		CSharpProjectInfo projectInfo = new CSharpProjectInfo(project);
-		if (projectInfo.IsDotNetCore()) {
+		if (projectInfo.isDotNetCore()) {
 			LOG.warn(".net core is not supported by FxCop - project " + project + " ignored.");
 			return null;
 		}
@@ -144,7 +145,10 @@ public class FxCopProjectGenerator {
 	private void saveToXML(Document dom, File fxCopConfigObj) {
 
 	    try (FileOutputStream fs = new FileOutputStream(fxCopConfigObj.getAbsoluteFile())) {
-            Transformer tr = TransformerFactory.newInstance().newTransformer();
+	    	TransformerFactory factory = TransformerFactory.newInstance();
+	    	factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+	    	
+            Transformer tr = factory.newTransformer();
             tr.setOutputProperty(OutputKeys.INDENT, "yes");
             tr.setOutputProperty(OutputKeys.METHOD, "xml");
             tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");

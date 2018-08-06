@@ -34,7 +34,7 @@ public class CSharpProjectInfo {
 		checkAllRequiredValuesFound();
 	}
 	
-	public boolean IsDotNetCore(){
+	public boolean isDotNetCore(){
 		if (targetFramework==null)return false;
 		return targetFramework.toLowerCase().contains("netcoreapp");
 	}

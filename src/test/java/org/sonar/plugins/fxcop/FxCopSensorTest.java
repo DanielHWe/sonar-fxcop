@@ -234,7 +234,7 @@ public class FxCopSensorTest {
     Settings settings = mock(Settings.class);
     when(settings.getString("sonar.projectKey")).thenReturn("abc:abc");
     
-    String res = FxCopSensor.TrimWorkdir(settings, "abcabc_0815");
+    String res = FxCopSensor.trimWorkdir(settings, "abcabc_0815");
     
     assertThat(res).isEqualTo("abc_0815");
   }
