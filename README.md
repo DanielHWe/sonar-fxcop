@@ -43,7 +43,7 @@ SonarQube.Scanner.MSBuild.exe begin /n:"MyProject" /v:"0.9.0.99" /k:"MyProject_k
 
 ### Scan on base of an sln file
 
-With 1.3 RC 1 there is the possibility to scan a compleate sln file. (The plugin will generate a fxcop project file including all assemblies from steh solution to scan the assemblies).
+With 1.3 RC 1 there is the possibility to scan a compleate sln file. (The plugin will generate a fxcop project file including all assemblies from the solution to scan the assemblies).
 
 Parameter is 'sonar.cs.fxcop.slnFile' while not use 'sonar.cs.fxcop.assembly'.
 
