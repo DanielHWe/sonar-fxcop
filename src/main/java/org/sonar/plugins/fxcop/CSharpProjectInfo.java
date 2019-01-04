@@ -18,8 +18,10 @@ public class CSharpProjectInfo {
 	private static final Logger LOG = Loggers.get(FxCopSensor.class);
 	static final Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
 	static final Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
-	static final Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\]+)</OutputPath>");
+	static final Pattern patternPath = Pattern.compile("<OutputPath>([\\w\\-\\ \\.\\\\\\$\\(\\)]+)</OutputPath>");
 	static final Pattern patternTargetFramework = Pattern.compile("<TargetFramework>([\\w\\-\\ \\.\\\\]+)</TargetFramework>");
+	static final Pattern patternTargetFrameworks = Pattern.compile("<TargetFrameworks>([\\w\\-\\ \\.\\\\;]+)</TargetFrameworks>");
+	static final Pattern patternVariable = Pattern.compile("$\\(([\\w]+)\\)");
 	
 	private String project = null;
 	private String name = null;
@@ -95,13 +97,18 @@ public class CSharpProjectInfo {
 	           }
 	           m = patternPath.matcher(currentLine);
 	           if (m.find()) {
-	        	   String path = convertPath(m.group(1));
-	        	   paths.add(path);
+	        	   String path = convertPath(m.group(1));	        	   
+	        	   addPath(path);
 	        	   LOG.debug("Found OutputPath ("+path+")");
 	           }
 	           m = patternTargetFramework.matcher(currentLine);
 	           if (m.find()) {
 	        	   targetFramework = m.group(1);	
+	        	   LOG.debug("Found TargetFramework ("+targetFramework+")");
+	           }
+	           m = patternTargetFrameworks.matcher(currentLine);
+	           if (m.find()) {
+	        	   SetTargetFrameworkFromList(m.group(1));	
 	        	   LOG.debug("Found TargetFramework ("+targetFramework+")");
 	           }
 	       }
@@ -110,6 +117,94 @@ public class CSharpProjectInfo {
 		}
 	}
 	
+	private void SetTargetFrameworkFromList(String listOfTargetFrameworks) {
+		String[] list = listOfTargetFrameworks.split(";");
+		targetFramework = null;
+		
+		for (String currentTargetFramework : list) {
+			if (!currentTargetFramework.startsWith("netcore")){
+				targetFramework = currentTargetFramework;
+				AddPathForFramework(targetFramework);
+			}
+		}
+		if (targetFramework!= null){
+			SetTypeForMultitargetProject();
+			SetNameForMultitargetProject();
+			return;
+		}
+		
+		LOG.warn("Found multitarget: '" + listOfTargetFrameworks + "' but none of those is supported.");
+		targetFramework = "netcoreapp";//not supported
+	}
+
+	private void SetNameForMultitargetProject() {
+		if (name == null) {
+			File projectFile = new File(project);
+			name = projectFile.getName().replace(".csproj", "");
+			LOG.debug("Set AssemblyName to default ("+name+")");
+		}
+		
+	}
+
+	private void SetTypeForMultitargetProject() {
+		if (type == null){
+			type = "Library";
+			LOG.debug("Set OutputType to default (Library)");
+		}
+		
+		
+	}
+
+	private void AddPathForFramework(String targetFramework) {
+		paths.add(convertPath("bin\\Debug\\"+targetFramework));
+		paths.add(convertPath("bin\\Release\\"+targetFramework));
+		
+	}
+
+	private void addPath(String path) {
+		boolean added = AddIfNoVariables(path);
+		if (added) return;
+		
+		String adaptedPath = path;
+		
+		
+		
+		added = SolveBuildConfigurationAndAdd(adaptedPath);
+		if (added) return;
+		
+		HandleUnreplaceableVariables(adaptedPath);
+	}
+
+	private boolean SolveBuildConfigurationAndAdd(String path) {
+		String adaptedPath = path.replace("$(BuildConfiguration)", "Debug");
+		boolean added = AddIfNoVariables(adaptedPath);
+		if (added) {
+			AddIfNoVariables(path.replace("$(BuildConfiguration)", "Release"));
+			return true;
+		}
+		HandleUnreplaceableVariables(adaptedPath);
+		return false;
+	}
+
+	private void HandleUnreplaceableVariables(String adaptedPath) {
+		Matcher m = patternType.matcher(adaptedPath);
+        if (m.find()) {
+     	   String variableName = (m.group(1));
+     	  LOG.error("Variable '"+variableName+"' found in output path, is not supported. Please define scan properties in command line or SonarQube.Analysis.xml.");
+			throw new IllegalStateException("Variable '"+variableName+"' found in output path, is not supported. Please define scan properties in command line or SonarQube.Analysis.xml.");
+        }
+        LOG.error("Path '"+adaptedPath+"' found in output path, is not supported. Please define scan properties in command line or SonarQube.Analysis.xml.");
+		throw new IllegalStateException("Path '"+adaptedPath+"' found in output path, is not supported. Please define scan properties in command line or SonarQube.Analysis.xml.");
+	}
+
+	private boolean AddIfNoVariables(String path) {
+		if (!path.contains("$(")) {
+			paths.add(path);
+			return true;
+		}
+		return false;
+	}
+
 	private String convertPath(String path){
 		if (File.pathSeparator.equals("\\")) {
  		   return path;

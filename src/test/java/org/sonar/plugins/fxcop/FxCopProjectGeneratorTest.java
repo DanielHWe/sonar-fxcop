@@ -22,12 +22,17 @@ public class FxCopProjectGeneratorTest {
 	private static String TEST_NO_TYPE_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppNoType.sln";
 	private static String TEST_NO_NAME_SLN = "src/test/resources/FxCopConfigGeneratorTests/TestAppNoName.sln";
 	private static String TEST_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1.csproj";
+	private static String TEST_CSPROJ_Replaceable_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1Replaceable.csproj";
+	private static String TEST_CSPROJ_None_Replaceable_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLib1NoneReplaceable2.csproj";
 	private static String TEST_CSPROJ_EXE = "src/test/resources/FxCopConfigGeneratorTests/TestApp1.csproj";
 	private static String TEST_CORE_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibCore.csproj";
+	private static String TEST_MULTI_NO_SUPPORT_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibMultiNoSupport.csproj";
+	private static String TEST_MULTI_SUPPORT_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibMultiSupport.csproj";
 	private static String TEST_DLL_RELEASE = "src/test/resources/bin/Release/TestLib1.dll";
 	private static String TEST_EXE_RELEASE = "src/test/resources/bin/Release/TestApp1.exe";
 	private static String TEST_DLL_DEBUG = "src/test/resources/bin/Debug/TestLib1.dll";
 	private static String TEST_CORE_DLL_DEBUG = "src/test/resources/FxCopConfigGeneratorTests/bin/Debug/netcoreapp2.0/TestLibCore.dll";
+	private static String TEST_MULTI_DLL_DEBUG = "src/test/resources/FxCopConfigGeneratorTests/bin/Debug/net452/TestLibMultiSupport.dll";
 	private static String TEST_EXE_DEBUG = "src/test/resources/bin/Debug/TestApp1.exe";
 	
 	
@@ -39,6 +44,10 @@ public class FxCopProjectGeneratorTest {
 		File binFolder = new File("src/test/resources/bin/Release");
 		binFolder.mkdirs();
 		binFolder = new File("src/test/resources/bin/Debug");
+		binFolder.mkdirs();
+		binFolder = new File("src/test/resources/bin/Debug/net452");
+		binFolder.mkdirs();
+		binFolder = new File("src/test/resources/bin/Release/net452");
 		binFolder.mkdirs();
 	}
 
@@ -209,6 +218,43 @@ public class FxCopProjectGeneratorTest {
 	  }
 	  
 	  @Test
+	  public void testMultiNoSupportCsprojDllDebugScan() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_CORE_DLL_DEBUG);
+		  new File( binFile.getParent()).mkdirs();
+		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String file = gen.getDllPathFromCsProj(TEST_MULTI_NO_SUPPORT_CSPROJ_DLL);
+		  
+		  assertThat(file).isNull();
+		  /* No .Net Core support in the moment
+		  assertThat(file).isNotEmpty();
+		  assertThat(file).endsWith("TestLibCore.dll");
+		  assertThat(file).doesNotContain("/../");
+		  assertThat(file).doesNotContain("\\..\\");*/
+	  }
+	  
+	  @Test
+	  public void testMultiSupportCsprojDllDebugScan() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_MULTI_DLL_DEBUG);
+		  new File( binFile.getParent()).mkdirs();
+		  binFile.createNewFile();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String file = gen.getDllPathFromCsProj(TEST_MULTI_SUPPORT_CSPROJ_DLL);
+		  
+		  assertThat(file).isNotNull();
+		  assertThat(file).isNotEmpty();
+		  assertThat(file).endsWith("TestLibMultiSupport.dll");
+		  assertThat(file).doesNotContain("/../");
+		  assertThat(file).doesNotContain("\\..\\");
+	  }
+	  
+	  @Test
 	  public void testCsprojDllDebugScan() throws IOException {
 		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
 		  
@@ -223,6 +269,34 @@ public class FxCopProjectGeneratorTest {
 		  assertThat(file).endsWith("TestLib1.dll");
 		  assertThat(file).doesNotContain("/../");
 		  assertThat(file).doesNotContain("\\..\\");
+	  }
+	  
+	  @Test
+	  public void testCsprojDllReplaceableDebugScan() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_DLL_DEBUG);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_Replaceable_DLL);
+		  
+		  assertThat(file).isNotNull();
+		  assertThat(file).isNotEmpty();
+		  assertThat(file).endsWith("TestLib1.dll");
+		  assertThat(file).doesNotContain("/../");
+		  assertThat(file).doesNotContain("\\..\\");
+	  }
+	  
+	  @Test(expected = IllegalStateException.class)
+	  public void testCsprojDllNoneReplaceableDebugScan() throws IOException {
+		  FxCopProjectGenerator gen = new FxCopProjectGenerator();
+		  
+		  File binFile = new File(TEST_DLL_DEBUG);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  
+		  String file = gen.getDllPathFromCsProj(TEST_CSPROJ_None_Replaceable_DLL);		  	
 	  }
 	  
 	  @Test

@@ -221,7 +221,7 @@ private boolean isFileSet(File currentFile) {
 public static String trimWorkdir(Settings settings, String workDirPath) {
 	String projectKey = settings.getString("sonar.projectKey");
 	if (projectKey!=null && !projectKey.isEmpty() && projectKey.indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
-		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':'))).replace(":", "");
+		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':'))).replace(":[^\\]", "").replace(":", "");
 		LOG.info("Project key: " + projectKey);
 		LOG.info("Work Dir: " + workDirPath);
 		File workDir = new File(workDirPath);
