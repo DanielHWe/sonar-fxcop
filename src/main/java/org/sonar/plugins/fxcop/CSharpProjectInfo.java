@@ -15,6 +15,8 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
 public class CSharpProjectInfo {
+	private static final String LIBRARY = "Library";
+	private static final String NETCOREAPP = "netcoreapp";
 	private static final Logger LOG = Loggers.get(FxCopSensor.class);
 	static final Pattern patternType = Pattern.compile("<OutputType>([\\w]+)</OutputType>");
 	static final Pattern patternName = Pattern.compile("<AssemblyName>([\\w\\-\\ \\.]+)</AssemblyName>");
@@ -38,12 +40,12 @@ public class CSharpProjectInfo {
 	
 	public boolean isDotNetCore(){
 		if (targetFramework==null)return false;
-		return targetFramework.toLowerCase().contains("netcoreapp");
+		return targetFramework.toLowerCase().contains(NETCOREAPP);
 	}
 
 	private void performOnNetCore() {
 		//Net core project files contain only non default settings, so set defaults if not set
-		if (targetFramework!=null && targetFramework.startsWith("netcoreapp")){
+		if (targetFramework!=null && targetFramework.startsWith(NETCOREAPP)){
 			if (paths.isEmpty()) {
 				paths.add(convertPath("bin\\Debug\\netcoreapp2.0"));
 				paths.add(convertPath("bin\\Release\\netcoreapp2.0"));
@@ -52,7 +54,7 @@ public class CSharpProjectInfo {
 				LOG.debug("Set Outputpath to default");
 			}
 			if (type == null){
-				type = "Library";
+				type = LIBRARY;
 				LOG.debug("Set OutputType to default (Library)");
 			}
 			if (name == null) {
@@ -108,7 +110,7 @@ public class CSharpProjectInfo {
 	           }
 	           m = patternTargetFrameworks.matcher(currentLine);
 	           if (m.find()) {
-	        	   SetTargetFrameworkFromList(m.group(1));	
+	        	   setTargetFrameworkFromList(m.group(1));	
 	        	   LOG.debug("Found TargetFramework ("+targetFramework+")");
 	           }
 	       }
@@ -117,27 +119,28 @@ public class CSharpProjectInfo {
 		}
 	}
 	
-	private void SetTargetFrameworkFromList(String listOfTargetFrameworks) {
+	private void setTargetFrameworkFromList(String listOfTargetFrameworks) {
 		String[] list = listOfTargetFrameworks.split(";");
 		targetFramework = null;
 		
 		for (String currentTargetFramework : list) {
-			if (!currentTargetFramework.startsWith("netcore")){
+			if (!currentTargetFramework.startsWith("netcore") &&
+					!currentTargetFramework.startsWith("netstandard")){
 				targetFramework = currentTargetFramework;
-				AddPathForFramework(targetFramework);
+				addPathForFramework(targetFramework);
 			}
 		}
 		if (targetFramework!= null){
-			SetTypeForMultitargetProject();
-			SetNameForMultitargetProject();
+			setTypeForMultitargetProject();
+			setNameForMultitargetProject();
 			return;
 		}
 		
 		LOG.warn("Found multitarget: '" + listOfTargetFrameworks + "' but none of those is supported.");
-		targetFramework = "netcoreapp";//not supported
+		targetFramework = NETCOREAPP;//not supported
 	}
 
-	private void SetNameForMultitargetProject() {
+	private void setNameForMultitargetProject() {
 		if (name == null) {
 			File projectFile = new File(project);
 			name = projectFile.getName().replace(".csproj", "");
@@ -146,47 +149,47 @@ public class CSharpProjectInfo {
 		
 	}
 
-	private void SetTypeForMultitargetProject() {
+	private void setTypeForMultitargetProject() {
 		if (type == null){
-			type = "Library";
+			type = LIBRARY;
 			LOG.debug("Set OutputType to default (Library)");
 		}
 		
 		
 	}
 
-	private void AddPathForFramework(String targetFramework) {
+	private void addPathForFramework(String targetFramework) {
 		paths.add(convertPath("bin\\Debug\\"+targetFramework));
 		paths.add(convertPath("bin\\Release\\"+targetFramework));
 		
 	}
 
 	private void addPath(String path) {
-		boolean added = AddIfNoVariables(path);
+		boolean added = addIfNoVariables(path);
 		if (added) return;
 		
 		String adaptedPath = path;
 		
 		
 		
-		added = SolveBuildConfigurationAndAdd(adaptedPath);
+		added = solveBuildConfigurationAndAdd(adaptedPath);
 		if (added) return;
 		
-		HandleUnreplaceableVariables(adaptedPath);
+		handleUnreplaceableVariables(adaptedPath);
 	}
 
-	private boolean SolveBuildConfigurationAndAdd(String path) {
+	private boolean solveBuildConfigurationAndAdd(String path) {
 		String adaptedPath = path.replace("$(BuildConfiguration)", "Debug");
-		boolean added = AddIfNoVariables(adaptedPath);
+		boolean added = addIfNoVariables(adaptedPath);
 		if (added) {
-			AddIfNoVariables(path.replace("$(BuildConfiguration)", "Release"));
+			addIfNoVariables(path.replace("$(BuildConfiguration)", "Release"));
 			return true;
 		}
-		HandleUnreplaceableVariables(adaptedPath);
+		handleUnreplaceableVariables(adaptedPath);
 		return false;
 	}
 
-	private void HandleUnreplaceableVariables(String adaptedPath) {
+	private void handleUnreplaceableVariables(String adaptedPath) {
 		Matcher m = patternType.matcher(adaptedPath);
         if (m.find()) {
      	   String variableName = (m.group(1));
@@ -197,7 +200,7 @@ public class CSharpProjectInfo {
 		throw new IllegalStateException("Path '"+adaptedPath+"' found in output path, is not supported. Please define scan properties in command line or SonarQube.Analysis.xml.");
 	}
 
-	private boolean AddIfNoVariables(String path) {
+	private boolean addIfNoVariables(String path) {
 		if (!path.contains("$(")) {
 			paths.add(path);
 			return true;
@@ -239,7 +242,7 @@ public class CSharpProjectInfo {
 	}
 	
 	private String getBinFileName(String type, String name) {
-		if (type.equalsIgnoreCase("Library")){
+		if (type.equalsIgnoreCase(LIBRARY)){
 			return name + ".dll";
 		}
 		return name + ".exe";
