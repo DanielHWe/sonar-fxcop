@@ -10,6 +10,8 @@ This is a plugin for Sonar Qube to scan C# and VB.net projects with the FxCop To
 
 The rules for FxCop can be activated in Sonar Qube Server Quality Profiles.
 
+The Project is licensed under GNU LGPL 3.
+
 ### Requirements
 
 To use the FxCop plugin, you also need to 
