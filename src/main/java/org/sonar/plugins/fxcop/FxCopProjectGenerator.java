@@ -90,13 +90,13 @@ public class FxCopProjectGenerator {
 
 	public String[] getCsprojForSolution(File slnFileObj) throws IOException {
 		List<String> result = new ArrayList<>();
-		final Pattern pattern = Pattern.compile("\\\"([\\w\\.\\\\\\ \\-]+\\.csproj)\\\"");
+		final Pattern pattern = Pattern.compile("\\\"([\\w\\.\\\\\\ \\-]+(\\.csproj|\\.vbproj))\\\"");
 		   
 		String parentDir = slnFileObj.getParent();
 		if (parentDir == null) {
 			parentDir = "";
 		}
-		
+	LOG.info("Buscando proyectos en: " + slnFileObj.getAbsolutePath());
        try (final BufferedReader reader = new BufferedReader(new FileReader(slnFileObj))) {
 	       while(reader.ready()) {
 	    	   Matcher m = pattern.matcher(reader.readLine());
