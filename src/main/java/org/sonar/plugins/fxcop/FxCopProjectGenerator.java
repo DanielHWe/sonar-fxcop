@@ -96,7 +96,7 @@ public class FxCopProjectGenerator {
 		if (parentDir == null) {
 			parentDir = "";
 		}
-	LOG.info("Buscando proyectos en: " + slnFileObj.getAbsolutePath());
+
        try (final BufferedReader reader = new BufferedReader(new FileReader(slnFileObj))) {
 	       while(reader.ready()) {
 	    	   Matcher m = pattern.matcher(reader.readLine());
