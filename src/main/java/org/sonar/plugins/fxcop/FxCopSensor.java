@@ -262,12 +262,12 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
           location.at(inputFile.selectLine(line));
         }
         newIssue.at(location);
-      } else if (absolutePath!=null) {
+      } else {
         NewIssueLocation location = newIssue.newLocation()
           .on(context.module())
           .message(createMessageLocation(absolutePath, issue.line()) + issue.message());
         newIssue.at(location);
-      }
+      } 
 
       newIssue.save();
       count ++;

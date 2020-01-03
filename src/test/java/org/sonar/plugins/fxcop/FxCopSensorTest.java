@@ -21,17 +21,14 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 
-import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.DefaultInputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -53,6 +50,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("deprecation")
 public class FxCopSensorTest {
 
   @Rule
@@ -74,8 +72,8 @@ public class FxCopSensorTest {
     SensorContext context = mock(SensorContext.class);
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
-    when(fs.baseDir()).thenReturn(new File("."));
-    Settings settings = mock(Settings.class);
+    when(fs.baseDir()).thenReturn(new File("."));    
+	Settings settings = mock(Settings.class);
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     
@@ -313,7 +311,7 @@ public class FxCopSensorTest {
     executor.setAspnet(true);
     sensor.analyse(writer, parser, executor, context); 
 
-    verify(writer).write(ImmutableList.of("CA0000", "CA1000", "CR1000"), new File(workingDir, "fxcop-sonarqube.ruleset"));
+    verify(writer).write(ImmutableList.of("CA0000", "CA1000"/*, "CR1000"*/), new File(workingDir, "fxcop-sonarqube.ruleset"));
     verify(executor).execute("MyLibrary.dll", new File(workingDir, "fxcop-sonarqube.ruleset"), new File(workingDir, "fxcop-report.xml"), 
       ImmutableList.of("c:/", "d:/"), ImmutableList.<String>of());
 
