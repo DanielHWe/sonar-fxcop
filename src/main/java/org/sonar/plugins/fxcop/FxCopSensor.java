@@ -43,6 +43,7 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+@SuppressWarnings("deprecation")
 public class FxCopSensor implements Sensor {
 
   private static final String CUSTOM_RULE_KEY = "CustomRuleTemplate";

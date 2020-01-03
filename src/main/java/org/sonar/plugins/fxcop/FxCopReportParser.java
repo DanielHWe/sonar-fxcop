@@ -29,8 +29,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import javax.annotation.Nullable;
-import javax.xml.XMLConstants;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;

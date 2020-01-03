@@ -31,6 +31,7 @@ import org.sonar.api.config.Settings;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+@SuppressWarnings("deprecation")
 public class FxCopConfiguration {
 
   private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
