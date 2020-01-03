@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.List;
+import java.util.Optional;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -38,7 +40,7 @@ import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -88,10 +90,10 @@ void executeImpl(SensorContext context) {
   void analyse(FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, SensorContext context) {
 	  
 	  
-	  Settings settings = context.settings();
+	  Configuration settings = context.config();
 
     File reportFile;
-    String reportPath = fxCopConf.reportPathPropertyKey() != null ? settings.getString(fxCopConf.reportPathPropertyKey()) : null;    
+    String reportPath = fxCopConf.reportPathPropertyKey() != null ? settings.get(fxCopConf.reportPathPropertyKey()).get() : null;    
     if (reportPath == null) {
       reportFile = executeFxCop(writer, executor, context, settings);
     } else {
@@ -194,7 +196,7 @@ private boolean isFileSet(File currentFile) {
 	  
   }
 
-  private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Settings settings) {
+  private File executeFxCop(FxCopRulesetWriter writer, FxCopExecutor executor, SensorContext context, Configuration settings) {
 	File reportFile;
 	String workDirPath = context.fileSystem().workDir().getAbsolutePath();
 	workDirPath = trimWorkdir(settings, workDirPath);
@@ -207,25 +209,21 @@ private boolean isFileSet(File currentFile) {
       String target = getTargetForSetting(settings);
       
       
-      executor.setExecutable(settings.getString(fxCopConf.fxCopCmdPropertyKey()));
-      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()));
-      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()));
+      executor.setExecutable(settings.get(fxCopConf.fxCopCmdPropertyKey()).get());
+      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()).get());
+      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()).get());
       
-      if (target== null) {
-    	  LOG.error("Execution targte not set");
-    	  return null;
-      }
-      
+           
       executor.execute(target,
         rulesetFile, reportFile, 
-        splitOnCommas(settings.getString(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.getString(fxCopConf.referencesPropertyKey())));
+        splitOnCommas(settings.get(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.get(fxCopConf.referencesPropertyKey())));
 	return reportFile;
   }
 
-public static String trimWorkdir(Settings settings, String workDirPath) {
-	String projectKey = settings.getString("sonar.projectKey");
-	if (projectKey!=null && !projectKey.isEmpty() && projectKey.indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
-		workDirPath = workDirPath.replace(projectKey.replace(":", ""), projectKey.substring(projectKey.indexOf(':')));
+public static String trimWorkdir(Configuration settings, String workDirPath) {
+	Optional<String> projectKey = settings.get("sonar.projectKey");
+	if (projectKey!=null && projectKey.isPresent() && !projectKey.get().isEmpty() && projectKey.get().indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
+		workDirPath = workDirPath.replace(projectKey.get().replace(":", ""), projectKey.get().substring(projectKey.get().indexOf(':')));
         workDirPath = workDirPath.replaceAll("^:", "").replace(":[^\\]", "");
 		LOG.info("Project key: " + projectKey);
 		LOG.info("Work Dir: " + workDirPath);
@@ -275,19 +273,19 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
 	LOG.info("FxCop found "+ count+" issue(s).");
   }
 
-  private String getTargetForSetting(Settings settings) {
+  private String getTargetForSetting(Configuration settings) {
 	String target = null;
       
       if (settings.hasKey(fxCopConf.assemblyPropertyKey())){
-    	  target = settings.getString(fxCopConf.assemblyPropertyKey());
+    	  target = settings.get(fxCopConf.assemblyPropertyKey()).get();
       }
       else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
     	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
-    	  String sln = settings.getString(fxCopConf.slnFilePropertyKey());
+    	  String sln = settings.get(fxCopConf.slnFilePropertyKey()).get();
     	  if (sln!=null) target = gen.generate(sln);
       }
       else { 
-    	  target = settings.getString(fxCopConf.projectFilePropertyKey());
+    	  target = settings.get(fxCopConf.projectFilePropertyKey()).get();
       }
 	return target;
   }
@@ -314,11 +312,11 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
     return fxcopLine <= 0 ? null : fxcopLine;
   }
 
-  private static List<String> splitOnCommas(@Nullable String property) {
-    if (property == null) {
+  private static List<String> splitOnCommas(Optional<String> property) {
+    if (property == null || !property.isPresent()) {
       return ImmutableList.of();
     } else {
-      return ImmutableList.copyOf(Splitter.on(",").trimResults().omitEmptyStrings().split(property));
+      return ImmutableList.copyOf(Splitter.on(",").trimResults().omitEmptyStrings().split(property.get()));
     }
   }
 

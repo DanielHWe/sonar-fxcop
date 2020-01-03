@@ -23,6 +23,9 @@ import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
 import org.sonar.api.utils.command.Command;
 import org.sonar.api.utils.command.CommandExecutor;
 import org.sonar.api.utils.log.Logger;
@@ -36,7 +39,7 @@ public class FxCopExecutor {
   private int timeout;
   private boolean aspnet;
 
-  public void execute(String targetFile, File rulesetFile, File reportFile, List<String> directories, List<String> references) {
+  public void execute(@Nullable String targetFile, File rulesetFile, File reportFile, List<String> directories, List<String> references) {
 	String targetFileArgument = "/file:" + targetFile;
 	if (targetFile.toLowerCase().endsWith(".fxcop")) {
 	   targetFileArgument = "/project:" +targetFile;
