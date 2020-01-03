@@ -85,7 +85,7 @@ public String getExecutable() {
 	return fxCopExecutablePath;
 }
 
-public void setExecutable(String executable) {
+public void setExecutable(@javax.annotation.Nullable String executable) {
 	this.fxCopExecutablePath = executable;
 }
 

@@ -74,7 +74,7 @@ public class FxCopSensor implements Sensor {
   }
 
 void executeImpl(SensorContext context) {
-	GetAlternativeSlnPath(context);
+	getAlternativeSlnPath(context);
     fxCopConf.setAlternativeSln(this.altSlnFile);
     if (!fxCopConf.checkProperties(context.settings())) {
       LOG.warn("Skipping FxCop, either the report file or the assembly is missing");
@@ -101,13 +101,13 @@ void executeImpl(SensorContext context) {
     parseReportFile(parser, context, reportFile);
   }
 
-String GetAlternativeSlnPath(SensorContext context) {
+String getAlternativeSlnPath(SensorContext context) {
 	try {
 		  File baseDir = context.fileSystem().baseDir();
 		  LOG.info("Base Dir: " + baseDir);
 		  altSlnFile = getSlnNameByProperty(context, baseDir);
 		  if (altSlnFile == null) {
-			  altSlnFile = GgetSlnFileFromContextPath(baseDir);
+			  altSlnFile = getSlnFileFromContextPath(baseDir);
 		  }
 		  return altSlnFile;
 	  } catch (Exception ex){
@@ -117,7 +117,7 @@ String GetAlternativeSlnPath(SensorContext context) {
 	
 }
 
-private String GgetSlnFileFromContextPath(File baseDir) {
+private String getSlnFileFromContextPath(File baseDir) {
 	FilenameFilter fileNameFilter = new FilenameFilter() {
 		   
 	        @Override
@@ -151,11 +151,9 @@ private String GgetSlnFileFromContextPath(File baseDir) {
 private File getSlnFromPath(File baseDir, FilenameFilter fileNameFilter, File newAltFile) {
 	File currentFile = newAltFile;
 	for (String f: baseDir.list(fileNameFilter)){
-		  if (isFileSet(currentFile)) {
+		  if (isFileSet(currentFile) || isOldSlnTest(newAltFile)) {
 			  currentFile=new File(baseDir, f);
-		  } else if (isOldSlnTest(newAltFile)){
-			  currentFile=new File(baseDir, f);
-		  }
+		  } 
 	  }
 	return currentFile;
 }
@@ -212,6 +210,11 @@ private boolean isFileSet(File currentFile) {
       executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()));
       executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()));
       
+      if (target== null) {
+    	  LOG.error("Execution targte not set");
+    	  return null;
+      }
+      
       executor.execute(target,
         rulesetFile, reportFile, 
         splitOnCommas(settings.getString(fxCopConf.directoriesPropertyKey())), splitOnCommas(settings.getString(fxCopConf.referencesPropertyKey())));
@@ -258,7 +261,7 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
           location.at(inputFile.selectLine(line));
         }
         newIssue.at(location);
-      } else {
+      } else if (absolutePath!=null) {
         NewIssueLocation location = newIssue.newLocation()
           .on(context.module())
           .message(createMessageLocation(absolutePath, issue.line()) + issue.message());
@@ -279,7 +282,8 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
       }
       else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
     	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
-    	  target = gen.generate(settings.getString(fxCopConf.slnFilePropertyKey()));
+    	  String sln = settings.getString(fxCopConf.slnFilePropertyKey());
+    	  if (sln!=null) target = gen.generate(sln);
       }
       else { 
     	  target = settings.getString(fxCopConf.projectFilePropertyKey());
@@ -287,7 +291,7 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
 	return target;
   }
 
-  private static String createMessageLocation(String absolutePath, Integer line) {
+  private static String createMessageLocation(@Nullable String absolutePath,@Nullable Integer line) {
     String messageLocation = "";
     if (absolutePath != null) {
       messageLocation += absolutePath;
@@ -334,6 +338,7 @@ public static String trimWorkdir(Settings settings, String workDirPath) {
         String effectiveConfigKey = activeRule.internalKey();
         if (effectiveConfigKey == null) {
           effectiveConfigKey = activeRule.param(CUSTOM_RULE_CHECK_ID_PARAMETER);
+          continue;
         }
 
         builder.add(effectiveConfigKey);

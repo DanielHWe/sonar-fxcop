@@ -79,7 +79,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNotEmpty();
     assertThat(res).contains("TestApp1.sln");
@@ -96,7 +96,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/NotExists.sln");
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNotEmpty();
     assertThat(res).contains("TestApp");
@@ -113,7 +113,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("");
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNotEmpty();
     assertThat(res).contains("TestApp");
@@ -130,7 +130,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNotEmpty();
     assertThat(res).contains("TestApp");
@@ -149,7 +149,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNotEmpty();
     assertThat(res).contains("TestApp");
@@ -166,7 +166,7 @@ public class FxCopSensorTest {
     when(context.settings()).thenReturn(settings);
     when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     
-    String res = sensor.GetAlternativeSlnPath(context);
+    String res = sensor.getAlternativeSlnPath(context);
     
     assertThat(res).isNull();
  }
