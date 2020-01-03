@@ -2,7 +2,11 @@
 
 [![Travis Build Status](https://travis-ci.org/DanielHWe/sonar-fxcop.svg?branch=master)](https://travis-ci.org/DanielHWe/sonar-fxcop)
 
-[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.sonarsource.dotnet:sonar-fxcop-plugin)](https://sonarcloud.io/dashboard?id=org.sonarsource.dotnet%3Asonar-fxcop-plugin)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=org.sonarsource.dotnet:sonar-fxcop-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.sonarsource.dotnet:sonar-fxcop-plugin) 
+ [![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.sonarsource.dotnet:sonar-fxcop-plugin&metric=coverage)](https://sonarcloud.io/component_measures/metric/coverage/list?id=org.sonarsource.dotnet:sonar-fxcop-plugin)
+ [![SonarCloud Bugs](https://sonarcloud.io/api/project_badges/measure?project=org.sonarsource.dotnet:sonar-fxcop-plugin&metric=bugs)](https://sonarcloud.io/component_measures/metric/reliability_rating/list?id=org.sonarsource.dotnet:sonar-fxcop-plugin)
+ [![SonarCloud Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=org.sonarsource.dotnet:sonar-fxcop-plugin&metric=vulnerabilities)](https://sonarcloud.io/component_measures/metric/security_rating/list?id=org.sonarsource.dotnet:sonar-fxcop-plugin)
+ 
 
 ### About
 

@@ -27,7 +27,9 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.config.Settings;
+import org.sonar.api.config.internal.MapSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -108,7 +110,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test
   public void check_properties() {
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibrary.dll").getAbsolutePath());
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
@@ -124,7 +126,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test
   public void check_properties_without_assembly_extension() {
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY).getAbsolutePath() + "*");
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
@@ -135,7 +137,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   
   @Test
   public void check_properties_without_assembly_full_name() throws IOException {
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY + ".dll").getAbsolutePath());
     when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
@@ -148,7 +150,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   public void check_properties_with_project_property_is_set_wrong() {
 	  thrown.expect(IllegalArgumentException.class);
 	    thrown.expectMessage("Cannot find the project");
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
     when(settings.hasKey(projectProperty)).thenReturn(true);
@@ -164,7 +166,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   @Test
   public void check_properties_with_project_property_is_set() {
 	  
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
     when(settings.hasKey(projectProperty)).thenReturn(true);
@@ -182,7 +184,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_false_when_assembly_property_not_found() {
 
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
 
     String assemblyProperty = "fooAssemblyKey";
 
@@ -197,7 +199,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_assembly_property_is_set() {
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     String assemblyProperty = "fooAssemblyKey";
     settings.setProperty("assemblyProperty", assemblyProperty);
     when(settings.hasKey(assemblyProperty)).thenReturn(false);
@@ -208,7 +210,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_project_property_is_set() {
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
     when(settings.hasKey(projectProperty)).thenReturn(false);
@@ -226,7 +228,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.pdb").getAbsolutePath());
     thrown.expectMessage("\"fooAssemblyKey\"");
 
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll").getAbsolutePath());
 
@@ -240,7 +242,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage("is not set");
     thrown.expectMessage("\'fooAssemblyKey\'");
 
-    Settings settings = mock(Settings.class);
+    MapSettings settings = mock(MapSettings.class);
     when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
     when(settings.getString("fooAssemblyKey")).thenReturn(null);
 
@@ -249,7 +251,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test
   public void check_properties_fxcopcmd_property_deprecated() {
-    Settings settings = new Settings();
+	  MapSettings settings = new MapSettings();
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("sonar.fxcop.installDirectory", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
@@ -266,7 +268,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
     thrown.expectMessage("\"fooFxCopCmdPathKey\"");
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
 
@@ -280,7 +282,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
     thrown.expectMessage("\"fooFxCopCmdPathKey\"");
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooSlnKey", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
 
@@ -289,7 +291,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test
   public void check_properties_timeout_property_deprecated() {
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
     settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
@@ -302,7 +304,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   
   @Test
   public void check_properties_timeout_property_deprecated_sln() {
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooSlnKey", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
     settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
@@ -318,7 +320,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Cannot find the assembly");    
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
@@ -330,7 +332,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 	    thrown.expect(IllegalArgumentException.class);
 	    thrown.expectMessage("Cannot find any assembly matching");    
 
-	    Settings settings = new Settings();
+	    MapSettings settings = new MapSettings();
 	    settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop*").getAbsolutePath());
 
 	    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
@@ -344,7 +346,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
     thrown.expectMessage("\"fooReportPathKey\"");
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
@@ -354,7 +356,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   @Test
   public void check_properties_report_project() {
     
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooReportPathKey", CONFIG_FILE_PATH);
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
@@ -368,7 +370,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expect(IllegalArgumentException.class);
     thrown.expectMessage("Cannot find the sln file");   
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("slnFilePath", new File("src/test/resources/FxCopConfigurationTest/sln-notfound.sln").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
@@ -378,7 +380,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   @Test
   public void check_properties_sln_path_not_found() {   
 
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());    
     settings.setProperty("slnFilePath", new File("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln").getAbsolutePath());
 
@@ -393,7 +395,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 	  thrown.expect(IllegalArgumentException.class);
 	  thrown.expectMessage("Cannot find the .pdb file ");
 	  
-    Settings settings = new Settings();
+    MapSettings settings = new MapSettings();
     
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
     fxCopConf.setAlternativeSln("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");

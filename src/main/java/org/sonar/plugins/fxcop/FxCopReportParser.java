@@ -29,10 +29,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import javax.annotation.Nullable;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class FxCopReportParser {
 
@@ -47,11 +52,17 @@ public class FxCopReportParser {
     private final ImmutableList.Builder<FxCopIssue> filesBuilder = ImmutableList.builder();
     private String ruleConfigKey;
     private boolean isSuppressed = false;
+    private static final Logger LOG = Loggers.get(FxCopSensor.class);
 
     public List<FxCopIssue> parse(File file) {
       this.file = file;
 
       XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+      try {
+    	  xmlFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+		} catch (IllegalArgumentException e) {
+			LOG.warn("Fail to set FEATURE_SECURE_PROCESSING: " + e.getMessage());
+		}
 
       try (InputStream is = new FileInputStream(file);
         InputStreamReader reader = new InputStreamReader(is, Charsets.UTF_8)) {

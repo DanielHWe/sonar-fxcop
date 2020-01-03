@@ -30,7 +30,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.FileSystem;
+import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultInputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.rule.internal.ActiveRulesBuilder;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.internal.DefaultSensorDescriptor;
@@ -272,15 +274,15 @@ public class FxCopSensorTest {
     FxCopExecutor executor = mock(FxCopExecutor.class);
 
     File workingDir = new File(new File("target/FxCopSensorTest/working-dir").getAbsolutePath());
-    context.fileSystem().setWorkDir(workingDir);
+    context.fileSystem().setWorkDir(workingDir.toPath());
 
-    DefaultInputFile class3InputFile = new DefaultInputFile(context.module().key(), "Class3.cs").setLanguage("foo");
+    InputFile class3InputFile = TestInputFileBuilder.create(context.module().key(), "Class3.cs").setLanguage("foo").build();
     // Class4 missing on purpose
-    DefaultInputFile class5InputFile = new DefaultInputFile(context.module().key(), "Class5.cs").setLanguage("foo");
-    DefaultInputFile class6InputFile = new DefaultInputFile(context.module().key(), "Class6.cs").setLanguage("foo").initMetadata("1\n2\n3\n4\n5\n6");
-    DefaultInputFile class7InputFile = new DefaultInputFile(context.module().key(), "Class7.cs").setLanguage("bar").initMetadata("1\n2\n3\n4\n5\n6\n7");
+    InputFile class5InputFile = TestInputFileBuilder.create(context.module().key(), "Class5.cs").setLanguage("foo").build();
+    InputFile class6InputFile = TestInputFileBuilder.create(context.module().key(), "Class6.cs").setLanguage("foo").initMetadata("1\n2\n3\n4\n5\n6").build();//.setMetadata("1\n2\n3\n4\n5\n6");
+    InputFile class7InputFile = TestInputFileBuilder.create(context.module().key(), "Class7.cs").setLanguage("foo").initMetadata("1\n2\n3\n4\n5\n6\n7").build();//.setMetadata("1\n2\n3\n4\n5\n6\n7");
     // Class8 has language "bar"
-    DefaultInputFile class8InputFile = new DefaultInputFile(context.module().key(), "Class8.cs").setLanguage("foo").initMetadata("1\n2\n3\n4\n5\n6\n7\n8");
+    InputFile class8InputFile = TestInputFileBuilder.create(context.module().key(), "Class8.cs").setLanguage("foo").initMetadata("1\n2\n3\n4\n5\n6\n7\n8").build();//.setMetadata("1\n2\n3\n4\n5\n6\n7\n8");
 
     context.fileSystem().add(class3InputFile);
     // Class4 missing on purpose

@@ -22,6 +22,7 @@ package org.sonar.plugins.fxcop;
 import java.util.List;
 import org.junit.Test;
 import org.sonar.api.Plugin;
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.utils.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ public class FxCopPluginTest {
 
   @Test
   public void getExtensions() {
-    Plugin.Context context = new Plugin.Context(mock(Version.class));
+    Plugin.Context context = new Plugin.Context((SonarRuntime) mock(SonarRuntime.class));
     new FxCopPlugin().define(context);
 
     List extensions = context.getExtensions();

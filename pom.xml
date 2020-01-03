@@ -5,11 +5,11 @@
   <groupId>org.sonarsource.dotnet</groupId>
   <artifactId>sonar-fxcop-plugin</artifactId>
   <packaging>sonar-plugin</packaging>
-  <version>1.4.2_SNAPSHOT2</version>
+  <version>1.4.2_Snapshot3</version>
 
   <name>SonarQube FxCop Plugin</name>
   <description>Enables scanning of C#/VB.NET source files with FxCop</description>
-  <url>https://github.com/SonarQubeCommunity/sonar-fxcop</url>
+  <url>https://github.com/DanielHWe/sonar-fxcop</url>
   <inceptionYear>2016</inceptionYear>
   <licenses>
     <license>
@@ -27,7 +27,7 @@
   </scm>
 
   <properties>
-    <sonar.version>5.6</sonar.version>
+    <sonar.version>6.7</sonar.version>
     <jdk.min.version>1.8</jdk.min.version>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
   </properties>

@@ -118,6 +118,11 @@ public class FxCopProjectGenerator {
 		 Document dom;
          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
          try {
+			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		} catch (ParserConfigurationException e) {
+			LOG.warn("Fail to set FEATURE_SECURE_PROCESSING: " + e.getMessage());
+		}
+         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(XML_TEMPLATE));
             dom = db.parse(is);

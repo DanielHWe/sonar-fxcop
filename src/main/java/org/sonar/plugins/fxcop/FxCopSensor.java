@@ -90,7 +90,7 @@ void executeImpl(SensorContext context) {
 	  Settings settings = context.settings();
 
     File reportFile;
-    String reportPath = settings.getString(fxCopConf.reportPathPropertyKey());    
+    String reportPath = fxCopConf.reportPathPropertyKey() != null ? settings.getString(fxCopConf.reportPathPropertyKey()) : null;    
     if (reportPath == null) {
       reportFile = executeFxCop(writer, executor, context, settings);
     } else {
