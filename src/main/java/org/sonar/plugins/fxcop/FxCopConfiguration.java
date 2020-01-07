@@ -35,7 +35,8 @@ import org.sonar.api.utils.log.Loggers;
 
 public class FxCopConfiguration {
 
-  private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
+  private static final String IS_NOT_PRESENT = "\" is not present.";
+private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
 private static final String DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY = "sonar.fxcop.installDirectory";
   private static final String DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY = "sonar.fxcop.timeoutMinutes";
   private static final String MISSING_SCAN_DEFINITION_TEXT = "FxCop plugin missed the definition of what to scan. Please set one of folowing properties:"+
@@ -298,7 +299,7 @@ private boolean hasSlnFile(Configuration settings){
 	  
 	  Preconditions.checkArgument(
 			  settingOptional.isPresent(),
-	      "The FxCop report  \"" + PROVIDED_BY_THE_PROPERTY + reportPathPropertyKey + "\" is not present.");
+	      "The FxCop report  \"" + PROVIDED_BY_THE_PROPERTY + reportPathPropertyKey + IS_NOT_PRESENT);
 	  
     File file = new File(settingOptional.get());
     Preconditions.checkArgument(
@@ -314,7 +315,7 @@ private boolean hasSlnFile(Configuration settings){
 	    
 	    Preconditions.checkArgument(
 	    		projectFilePath.isPresent(),
-	      "The project file \"" + PROVIDED_BY_THE_PROPERTY + projectFilePropertyKey + "\" is not present.");
+	      "The project file \"" + PROVIDED_BY_THE_PROPERTY + projectFilePropertyKey + IS_NOT_PRESENT);
 
 	    File assemblyFile = new File(projectFilePath.get());
 	    Preconditions.checkArgument(
@@ -331,7 +332,7 @@ private boolean hasSlnFile(Configuration settings){
 	    
 	    Preconditions.checkArgument(
 	    		slnFilePath.isPresent(),
-	      "The sln file \"" + PROVIDED_BY_THE_PROPERTY + slnFilePropertyKey + "\" is not present.");
+	      "The sln file \"" + PROVIDED_BY_THE_PROPERTY + slnFilePropertyKey + IS_NOT_PRESENT);
 
 
 	    File slnFile = new File(slnFilePath.get());

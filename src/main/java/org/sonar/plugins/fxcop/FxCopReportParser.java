@@ -50,7 +50,7 @@ public class FxCopReportParser {
     private final ImmutableList.Builder<FxCopIssue> filesBuilder = ImmutableList.builder();
     private String ruleConfigKey;
     private boolean isSuppressed = false;
-    private static final Logger LOG = Loggers.get(FxCopSensor.class);
+    private static final Logger LOG = Loggers.get(Parser.class);
 
     public List<FxCopIssue> parse(File file) {
       this.file = file;

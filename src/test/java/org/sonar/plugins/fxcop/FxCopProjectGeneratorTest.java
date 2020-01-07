@@ -28,12 +28,12 @@ public class FxCopProjectGeneratorTest {
 	private static String TEST_CORE_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibCore.csproj";
 	private static String TEST_MULTI_NO_SUPPORT_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibMultiNoSupport.csproj";
 	private static String TEST_MULTI_SUPPORT_CSPROJ_DLL = "src/test/resources/FxCopConfigGeneratorTests/TestLibMultiSupport.csproj";
-	private static String TEST_DLL_RELEASE = "src/test/resources/bin/Release/TestLib1.dll";
-	private static String TEST_EXE_RELEASE = "src/test/resources/bin/Release/TestApp1.exe";
-	private static String TEST_DLL_DEBUG = "src/test/resources/bin/Debug/TestLib1.dll";
+	static String TEST_DLL_RELEASE = "src/test/resources/bin/Release/TestLib1.dll";
+	static String TEST_EXE_RELEASE = "src/test/resources/bin/Release/TestApp1.exe";
+	static String TEST_DLL_DEBUG = "src/test/resources/bin/Debug/TestLib1.dll";
 	private static String TEST_CORE_DLL_DEBUG = "src/test/resources/FxCopConfigGeneratorTests/bin/Debug/netcoreapp2.0/TestLibCore.dll";
 	private static String TEST_MULTI_DLL_DEBUG = "src/test/resources/FxCopConfigGeneratorTests/bin/Debug/net452/TestLibMultiSupport.dll";
-	private static String TEST_EXE_DEBUG = "src/test/resources/bin/Debug/TestApp1.exe";
+	static String TEST_EXE_DEBUG = "src/test/resources/bin/Debug/TestApp1.exe";
 	
 	
 	@Rule

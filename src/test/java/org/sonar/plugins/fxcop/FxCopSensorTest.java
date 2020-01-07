@@ -21,8 +21,12 @@ package org.sonar.plugins.fxcop;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -58,6 +62,15 @@ public class FxCopSensorTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
+  
+  @After
+  public void cleanUpEach(){
+	  File binFolder = new File("src/test/resources/bin/Release");
+	  FxCopProjectGeneratorTest.deleteFolder(binFolder);
+		binFolder = new File("src/test/resources/bin/Debug");
+		FxCopProjectGeneratorTest.deleteFolder(binFolder);
+  }
+  
 
   @Test
   public void testDescriptor() {
@@ -231,12 +244,66 @@ public class FxCopSensorTest {
     //settings.setProperty("sonar.projectKey")).thenReturn("abc:abc");
     settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
         
-    sensor.getTargetForSetting(settings.asConfig());
+    String result = sensor.getTargetForSetting(settings.asConfig());
+    assertThat(result).isNull();
+  }
+  
+  @Test
+  public void testGetTargetForSettingMissAssembly() {  
+	  thrown.expect(IllegalStateException.class);
+	  thrown.expectMessage("TestApp1.exe");
+	  
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "assemblyKey", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    MapSettings settings = new MapSettings();
+    //settings.setProperty("sonar.projectKey")).thenReturn("abc:abc");
+    settings.setProperty("sonar.cs.fxcop.slnFile", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+        
+    String result = sensor.getTargetForSetting(settings.asConfig());
+    assertThat(result).isNotNull();
+  }
+  
+  @Test
+  public void testGetTargetForSettingWithAssembly()throws IOException {  
+	  File binFolder = new File("src/test/resources/bin/Release");
+		binFolder.mkdirs();
+		binFolder = new File("src/test/resources/bin/Debug");
+		binFolder.mkdirs();
+		
+		File binFile = new File(FxCopProjectGeneratorTest.TEST_EXE_RELEASE);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  binFile = new File(FxCopProjectGeneratorTest.TEST_EXE_DEBUG);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  binFile = new File(FxCopProjectGeneratorTest.TEST_DLL_DEBUG);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+		  binFile = new File(FxCopProjectGeneratorTest.TEST_DLL_RELEASE);
+		  assertThat(binFile.createNewFile()).isTrue();
+		  assertThat(Files.exists(Paths.get(binFile.getAbsolutePath()))).isTrue();
+	  
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "assemblyKey", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    MapSettings settings = new MapSettings();
+    //settings.setProperty("sonar.projectKey")).thenReturn("abc:abc");
+    settings.setProperty("sonar.cs.fxcop.slnFile", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("assemblyKey", "src/test/resources/bin");
+        
+    String result = sensor.getTargetForSetting(settings.asConfig());
+    assertThat(result).isNotNull();
   }
   
   @Test
   public void testExecuteImpl() {  
 	  thrown.expect(RuntimeException.class);
+	  
 	  
     FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
     SensorContext context = mock(SensorContext.class);
