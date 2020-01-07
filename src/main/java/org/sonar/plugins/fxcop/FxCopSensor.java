@@ -93,7 +93,8 @@ void executeImpl(SensorContext context) {
 	  Configuration settings = context.config();
 
     File reportFile;
-    String reportPath = fxCopConf.reportPathPropertyKey() != null ? settings.get(fxCopConf.reportPathPropertyKey()).get() : null;    
+    String reportPath = getReportPath(settings);
+      
     if (reportPath == null) {
       reportFile = executeFxCop(writer, executor, context, settings);
     } else {
@@ -103,6 +104,16 @@ void executeImpl(SensorContext context) {
 
     parseReportFile(parser, context, reportFile);
   }
+
+private String getReportPath(Configuration settings) {
+	String reportPath = null;
+    String reportKey = fxCopConf.reportPathPropertyKey();
+    if (reportKey != null) {
+    	Optional<String> reportOptinal = settings.get(reportKey);
+    	if (reportOptinal.isPresent()) reportPath = reportOptinal.get();
+    }
+	return reportPath;
+}
 
 String getAlternativeSlnPath(SensorContext context) {
 	try {
@@ -209,9 +220,9 @@ private boolean isFileSet(File currentFile) {
       String target = getTargetForSetting(settings);
       
       
-      executor.setExecutable(settings.get(fxCopConf.fxCopCmdPropertyKey()).get());
-      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()).get());
-      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()).get());
+      executor.setExecutable(settings.get(fxCopConf.fxCopCmdPropertyKey()).orElse(null));
+      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()).orElse(null));
+      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()).orElse(null));
       
            
       executor.execute(target,
@@ -222,7 +233,7 @@ private boolean isFileSet(File currentFile) {
 
 public static String trimWorkdir(Configuration settings, String workDirPath) {
 	Optional<String> projectKey = settings.get("sonar.projectKey");
-	if (projectKey!=null && projectKey.isPresent() && !projectKey.get().isEmpty() && projectKey.get().indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
+	if (projectKey.isPresent() && !projectKey.get().isEmpty() && projectKey.get().indexOf(':') >= 0/*&& projectKey.matches("[a-zA-Z0-9_-]:[a-zA-Z0-9_-]:[a-zA-Z0-9_-]")*/){
 		workDirPath = workDirPath.replace(projectKey.get().replace(":", ""), projectKey.get().substring(projectKey.get().indexOf(':')));
         workDirPath = workDirPath.replaceAll("^:", "").replace(":[^\\]", "");
 		LOG.info("Project key: " + projectKey);
@@ -277,15 +288,15 @@ public static String trimWorkdir(Configuration settings, String workDirPath) {
 	String target = null;
       
       if (settings.hasKey(fxCopConf.assemblyPropertyKey())){
-    	  target = settings.get(fxCopConf.assemblyPropertyKey()).get();
+    	  target = settings.get(fxCopConf.assemblyPropertyKey()).orElse(null);
       }
       else if (settings.hasKey(fxCopConf.slnFilePropertyKey())) { 
     	  FxCopProjectGenerator gen = new FxCopProjectGenerator();
-    	  String sln = settings.get(fxCopConf.slnFilePropertyKey()).get();
+    	  String sln = settings.get(fxCopConf.slnFilePropertyKey()).orElse(null);
     	  if (sln!=null) target = gen.generate(sln);
       }
       else { 
-    	  target = settings.get(fxCopConf.projectFilePropertyKey()).get();
+    	  target = settings.get(fxCopConf.projectFilePropertyKey()).orElse(null);
       }
 	return target;
   }
@@ -313,7 +324,7 @@ public static String trimWorkdir(Configuration settings, String workDirPath) {
   }
 
   private static List<String> splitOnCommas(Optional<String> property) {
-    if (property == null || !property.isPresent()) {
+    if (!property.isPresent()) {
       return ImmutableList.of();
     } else {
       return ImmutableList.copyOf(Splitter.on(",").trimResults().omitEmptyStrings().split(property.get()));
