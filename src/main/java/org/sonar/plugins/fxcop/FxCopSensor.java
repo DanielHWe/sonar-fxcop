@@ -79,7 +79,9 @@ public class FxCopSensor implements Sensor {
 void executeImpl(SensorContext context) {
 	getAlternativeSlnPath(context);
     fxCopConf.setAlternativeSln(this.altSlnFile);
-    if (!fxCopConf.checkProperties(context.settings())) {
+    Configuration config = context.config();
+    if (config==null)throw new IllegalArgumentException("Context is not configured");
+    if (!fxCopConf.checkProperties(config)) {
       LOG.warn("Skipping FxCop, either the report file or the assembly is missing");
       return;
     }
@@ -182,16 +184,16 @@ private boolean isFileSet(File currentFile) {
 
   private String getSlnNameByProperty(SensorContext context, File baseDir) {
 	  try {
-		String slnName = context.settings().getString("sonar.dotnet.visualstudio.solution.file");
-		if (slnName == null || slnName.isEmpty()){
+		Optional<String> slnName = context.config().get("sonar.dotnet.visualstudio.solution.file");
+		if (!slnName.isPresent() || slnName.get().isEmpty()){
 			LOG.info("sonar.dotnet.visualstudio.solution.file not set");
 			return null;
 		}
-		File slnFile = new File(slnName);
+		File slnFile = new File(slnName.get());
 		if (slnFile.exists()) {
 			return slnFile.getAbsolutePath();
 		}else {
-		  slnFile = new File(baseDir,slnName);
+		  slnFile = new File(baseDir,slnName.get());
 		  if (slnFile.exists()) {			  
 			  return slnFile.getAbsolutePath();
 		  }else {
@@ -221,8 +223,8 @@ private boolean isFileSet(File currentFile) {
       
       
       executor.setExecutable(settings.get(fxCopConf.fxCopCmdPropertyKey()).orElse(null));
-      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()).orElse(null));
-      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()).orElse(null));
+      executor.setTimeout(settings.getInt(fxCopConf.timeoutPropertyKey()).orElse(60));
+      executor.setAspnet(settings.getBoolean(fxCopConf.aspnetPropertyKey()).orElse(false));
       
            
       executor.execute(target,
@@ -284,7 +286,7 @@ public static String trimWorkdir(Configuration settings, String workDirPath) {
 	LOG.info("FxCop found "+ count+" issue(s).");
   }
 
-  private String getTargetForSetting(Configuration settings) {
+String getTargetForSetting(Configuration settings) {
 	String target = null;
       
       if (settings.hasKey(fxCopConf.assemblyPropertyKey())){

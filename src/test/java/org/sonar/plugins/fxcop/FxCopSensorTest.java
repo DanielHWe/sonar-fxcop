@@ -73,9 +73,10 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("."));    
-	MapSettings settings = mock(MapSettings.class);
+	MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -90,9 +91,10 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/NotExists.sln");
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/NotExists.sln");
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -107,9 +109,10 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("");
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "");
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -124,9 +127,10 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", (String)null);
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -143,9 +147,10 @@ public class FxCopSensorTest {
     File binFolder = new File("src/test/resources/FxCopConfigGeneratorTests/bin");
     if (!binFolder.exists()) binFolder.mkdir();
     when(fs.baseDir()).thenReturn(binFolder);
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenThrow(new IllegalArgumentException("test"));
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "test");
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -160,9 +165,10 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenThrow(new IllegalArgumentException("FAKE"));
     when(fs.baseDir()).thenReturn(new File("."));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     
     String res = sensor.getAlternativeSlnPath(context);
     
@@ -181,11 +187,12 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
-    when(settings.getString("sonar.cs.fxcop.report")).thenReturn("dummy.rep");
-    when(settings.hasKey("sonar.cs.fxcop.report")).thenReturn(true);
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file","src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("sonar.cs.fxcop.report", "dummy.rep");
+    settings.setProperty("sonar.cs.fxcop.report", true);
     
     sensor.execute(context);
   }
@@ -201,13 +208,30 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
-    when(settings.getString("sonar.cs.fxcop.report")).thenReturn("dummy.rep");
-    when(settings.hasKey("sonar.cs.fxcop.report")).thenReturn(true);
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("sonar.cs.fxcop.report", "dummy.rep");
+   
     
     sensor.executeImpl(context);
+  }
+  
+  @Test
+  public void testGetTargetForSetting() {  
+	      
+	  
+    FxCopSensor sensor = new FxCopSensor(new FxCopConfiguration("foo", "foo-fxcop", "", "", "sonar.cs.fxcop.slnFile", "", "", "", "", "", "sonar.cs.fxcop.report"));
+    SensorContext context = mock(SensorContext.class);
+    FileSystem fs = mock(FileSystem.class);
+    when(context.fileSystem()).thenReturn(fs);
+    when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
+    MapSettings settings = new MapSettings();
+    //settings.setProperty("sonar.projectKey")).thenReturn("abc:abc");
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+        
+    sensor.getTargetForSetting(settings.asConfig());
   }
   
   @Test
@@ -219,11 +243,11 @@ public class FxCopSensorTest {
     FileSystem fs = mock(FileSystem.class);
     when(context.fileSystem()).thenReturn(fs);
     when(fs.baseDir()).thenReturn(new File("src/test/resources/FxCopConfigGeneratorTests/"));
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     when(context.settings()).thenReturn(settings);
-    when(settings.getString("sonar.dotnet.visualstudio.solution.file")).thenReturn("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
-    when(settings.getString("sonar.cs.fxcop.report")).thenReturn("src/test/resources/FxCopConfigurationTest/MyLibrary.report");
-    when(settings.hasKey("sonar.cs.fxcop.report")).thenReturn(true);
+    when(context.config()).thenReturn(settings.asConfig());
+    settings.setProperty("sonar.dotnet.visualstudio.solution.file", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    settings.setProperty("sonar.cs.fxcop.report", "src/test/resources/FxCopConfigurationTest/MyLibrary.report");
     
     sensor.executeImpl(context);
   }
@@ -232,7 +256,7 @@ public class FxCopSensorTest {
   public void testTrimWorkDir() {  
 	  
     MapSettings settings = new MapSettings();
-    //when(settings.getString("sonar.projectKey")).thenReturn("abc:abc");
+    //settings.setProperty("sonar.projectKey")).thenReturn("abc:abc");
     settings.appendProperty("sonar.projectKey", "abc:abc");
     
     String res = FxCopSensor.trimWorkdir(settings.asConfig(), "abcabc_0815");

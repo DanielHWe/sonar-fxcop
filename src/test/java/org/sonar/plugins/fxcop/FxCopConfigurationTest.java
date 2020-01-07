@@ -110,73 +110,64 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
   @Test
   public void check_properties() {
-    MapSettings settings = mock(MapSettings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibrary.dll").getAbsolutePath());
-    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
-    when(settings.hasKey("fooFxCopReportPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopReportPathKey")).thenReturn(CONFIG_FILE_PATH);
+    MapSettings settings = new MapSettings();
+    settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll")    ;
+    settings.setProperty("fooFxCopCmdPathKey", "src/test/resources/FxCopConfigurationTest/FxCopCmd.exe");
+    settings.setProperty("fooFxCopReportPathKey", CONFIG_FILE_PATH);
 
     FxCopConfiguration config = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooFxCopReportPathKey");
     
-    config.checkProperties(settings);
+    config.checkProperties(settings.asConfig());
     config.setAlternativeSln("abc");
   }
 
   @Test
   public void check_properties_without_assembly_extension() {
-    MapSettings settings = mock(MapSettings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY).getAbsolutePath() + "*");
-    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    MapSettings settings = new MapSettings();;
+    settings.setProperty("fooAssemblyKey", new File(MY_LIBRARY).getAbsolutePath() + "*");
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings.asConfig());
   }
   
   @Test
   public void check_properties_without_assembly_full_name() throws IOException {
-    MapSettings settings = mock(MapSettings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File(MY_LIBRARY + ".dll").getAbsolutePath());
-    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    MapSettings settings = new MapSettings();
+    
+    settings.setProperty("fooAssemblyKey", new File(MY_LIBRARY + ".dll").getAbsolutePath());
+    
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings.asConfig());
   }
   
   @Test
   public void check_properties_with_project_property_is_set_wrong() {
 	  thrown.expect(IllegalArgumentException.class);
 	    thrown.expectMessage("Cannot find the project");
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
-    when(settings.hasKey(projectProperty)).thenReturn(true);
-    when(settings.getString(projectProperty)).thenReturn("src/test/resources/FxCopConfigurationTest/abc.fxCopProject");
-    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    settings.setProperty(projectProperty, "src/test/resources/FxCopConfigurationTest/abc.fxCopProject");
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
-    assertThat(config.checkProperties(settings)).isFalse();
+    FxCopConfiguration config = new FxCopConfiguration("", "", "", projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
+    assertThat(config.checkProperties(settings.asConfig())).isFalse();
   }
   
   @Test
   public void check_properties_with_project_property_is_set() {
 	  
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
-    when(settings.hasKey(projectProperty)).thenReturn(true);
-    when(settings.getString(projectProperty)).thenReturn("src/test/resources/FxCopConfigurationTest/MyLibrary.fxCopProj");
-    when(settings.hasKey("fooFxCopCmdPathKey")).thenReturn(true);
-    when(settings.getString("fooFxCopCmdPathKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    settings.setProperty(projectProperty,"src/test/resources/FxCopConfigurationTest/MyLibrary.fxCopProj");
+    settings.setProperty("fooFxCopCmdPathKey",new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
-    assertThat(config.checkProperties(settings)).isTrue();
+    FxCopConfiguration config = new FxCopConfiguration("", "", "", projectProperty, "", "fooFxCopCmdPathKey", "", "", "", "", "");
+    assertThat(config.checkProperties(settings.asConfig())).isTrue();
   }
 
 
@@ -184,39 +175,36 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_false_when_assembly_property_not_found() {
 
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
 
     String assemblyProperty = "fooAssemblyKey";
 
-    when(settings.hasKey(assemblyProperty)).thenReturn(false);
 
 
 
     FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "", "");
 
-    assertThat(config.checkProperties(settings)).isFalse();
+    assertThat(config.checkProperties(settings.asConfig())).isFalse();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_assembly_property_is_set() {
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     String assemblyProperty = "fooAssemblyKey";
     settings.setProperty("assemblyProperty", assemblyProperty);
-    when(settings.hasKey(assemblyProperty)).thenReturn(false);
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", null, "", "", "", "", "", "");
-    assertThat(config.checkProperties(settings)).isFalse();
+    FxCopConfiguration config = new FxCopConfiguration("", "", assemblyProperty, "", "", "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings.asConfig())).isFalse();
   }
   
   @Test(expected = IllegalArgumentException.class)
   public void check_properties_should_return_true_when_project_property_is_set() {
-    MapSettings settings = mock(MapSettings.class);
+    MapSettings settings = new MapSettings();
     String projectProperty = "fooAssemblyKey";
     settings.setProperty("projectFileProperty", "fooAssemblyKey");
-    when(settings.hasKey(projectProperty)).thenReturn(false);
 
-    FxCopConfiguration config = new FxCopConfiguration("", "", null, projectProperty, "", "", "", "", "", "", "");
-    assertThat(config.checkProperties(settings)).isFalse();
+    FxCopConfiguration config = new FxCopConfiguration("", "", "", projectProperty, "", "", "", "", "", "", "");
+    assertThat(config.checkProperties(settings.asConfig())).isFalse();
   }
   
   
@@ -228,11 +216,10 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.pdb").getAbsolutePath());
     thrown.expectMessage("\"fooAssemblyKey\"");
 
-    MapSettings settings = mock(MapSettings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll").getAbsolutePath());
+    MapSettings settings = new MapSettings();
+    settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings.asConfig());
   }
   
   @Test
@@ -242,11 +229,14 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     thrown.expectMessage("is not set");
     thrown.expectMessage("\'fooAssemblyKey\'");
 
-    MapSettings settings = mock(MapSettings.class);
-    when(settings.hasKey("fooAssemblyKey")).thenReturn(true);
-    when(settings.getString("fooAssemblyKey")).thenReturn(null);
+    MapSettings settings = new MapSettings();
+    settings.setProperty("fooAssemblyKey", (String)null);
+    
+    
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "").checkProperties(settings);
+    FxCopConfiguration xCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "", "", "", "", "", "");
+    		xCopConf.setAlternativeSln("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
+    		xCopConf.checkProperties(settings.asConfig());
   }
 
   @Test
@@ -256,7 +246,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("sonar.fxcop.installDirectory", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
 
     assertThat(settings.getString(fxCopConf.fxCopCmdPropertyKey())).isEqualTo(new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
   }
@@ -272,7 +262,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("fooAssemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibrary.dll");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings.asConfig());
   }
   
   @Test
@@ -286,7 +276,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("fooSlnKey", "src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
     settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmdNotFound.exe").getAbsolutePath());
 
-    new FxCopConfiguration("", "", "", "", "fooSlnKey", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings);
+    new FxCopConfiguration("", "", "", "", "fooSlnKey", "fooFxCopCmdPathKey", "", "", "", "", "").checkProperties(settings.asConfig());
   }
 
   @Test
@@ -297,7 +287,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "fooTimeoutKey", "", "", "", "");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
 
     assertThat(settings.getString(fxCopConf.timeoutPropertyKey())).isEqualTo("42");
   }
@@ -310,7 +300,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("sonar.fxcop.timeoutMinutes", "42");
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "fooSlnKey", "fooFxCopCmdPathKey", "fooTimeoutKey", "", "", "", "");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
 
     assertThat(settings.getString(fxCopConf.timeoutPropertyKey())).isEqualTo("42");
   }
@@ -324,7 +314,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
   }
   
   @Test
@@ -336,7 +326,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 	    settings.setProperty("fooAssemblyKey", new File("src/test/resources/FxCopConfigurationTest/fxcop*").getAbsolutePath());
 
 	    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "fooAssemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "");
-	    fxCopConf.checkProperties(settings);
+	    fxCopConf.checkProperties(settings.asConfig());
 	  }
   
   @Test
@@ -350,7 +340,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("fooReportPathKey", new File("src/test/resources/FxCopConfigurationTest/fxcop-report-notfound.xml").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
   }
   
   @Test
@@ -358,9 +348,11 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     
     MapSettings settings = new MapSettings();
     settings.setProperty("fooReportPathKey", CONFIG_FILE_PATH);
+    
 
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
-    fxCopConf.checkProperties(settings);
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "assemblyKey", "fooProjectPath", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    
+    fxCopConf.checkProperties(settings.asConfig());
     
     assertThat(fxCopConf.projectFilePropertyKey()).isEqualTo("fooProjectPath");
   }
@@ -374,7 +366,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
     settings.setProperty("slnFilePath", new File("src/test/resources/FxCopConfigurationTest/sln-notfound.sln").getAbsolutePath());
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
   }
   
   @Test
@@ -386,7 +378,7 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 
     FxCopConfiguration fxCopConf = new FxCopConfiguration("CS", "", "", "", "slnFilePath", "fooFxCopCmdPathKey", "", "", "", "", "");
     
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
     assertThat(fxCopConf.slnFilePropertyKey()).isEqualTo("slnFilePath");
   }
 
@@ -396,10 +388,12 @@ private static final String CONFIG_FILE_PATH = new File("src/test/resources/FxCo
 	  thrown.expectMessage("Cannot find the .pdb file ");
 	  
     MapSettings settings = new MapSettings();
+    settings.setProperty("fooFxCopCmdPathKey", new File("src/test/resources/FxCopConfigurationTest/FxCopCmd.exe").getAbsolutePath());
+    settings.setProperty("assemblyKey", "src/test/resources/FxCopConfigurationTest/MyLibraryWithoutPdb.dll");
     
-    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
+    FxCopConfiguration fxCopConf = new FxCopConfiguration("", "", "assemblyKey", "", "", "fooFxCopCmdPathKey", "", "", "", "", "fooReportPathKey");
     fxCopConf.setAlternativeSln("src/test/resources/FxCopConfigGeneratorTests/TestApp1.sln");
-    fxCopConf.checkProperties(settings);
+    fxCopConf.checkProperties(settings.asConfig());
   }
 }
 

@@ -26,12 +26,13 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-@SuppressWarnings("deprecation")
+
 public class FxCopConfiguration {
 
   private static final String PROVIDED_BY_THE_PROPERTY = "\" provided by the property \"";
@@ -118,7 +119,7 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
     return reportPathPropertyKey;
   }
 
-  public boolean checkProperties(Settings settings) {
+  public boolean checkProperties(Configuration settings) {
 	    if (settings.hasKey(reportPathPropertyKey)) {
 	      checkReportPathProperty(settings);
 	    } else {
@@ -127,12 +128,12 @@ public FxCopConfiguration(String languageKey, String repositoryKey, String assem
 	    return true;
 	  }
 
-private void checkScanProperties(Settings settings) {
+private void checkScanProperties(Configuration settings) {
 	if (isNoScanOptionSet(settings)){
 		LOG.warn(MISSING_SCAN_DEFINITION_TEXT);
 		if (this.alternativeSlnFile != null && !this.alternativeSlnFile.isEmpty()) {
 			LOG.warn("Use default sln file found: " + this.alternativeSlnFile);
-			settings.appendProperty(slnFilePropertyKey, this.alternativeSlnFile);
+			
 		} else {
 			LOG.error("No possible default found sln, please specify.");
 			throw new IllegalArgumentException(MISSING_SCAN_DEFINITION_TEXT);
@@ -163,25 +164,29 @@ private void checkScanProperties(Settings settings) {
 	}
 }
 
-private boolean isSolutionFileScanOptionSet(Settings settings) {
+private boolean isSolutionFileScanOptionSet(Configuration settings) {
 	return !settings.hasKey(assemblyPropertyKey) && 
 			!settings.hasKey(projectFilePropertyKey)&& 
 			settings.hasKey(slnFilePropertyKey);
 }
 
-private boolean isProjectFileScanOptionSet(Settings settings) {
+private boolean isProjectFileScanOptionSet(Configuration settings) {
 	return !settings.hasKey(assemblyPropertyKey) && 
 		settings.hasKey(projectFilePropertyKey)&& 
-		!settings.hasKey(slnFilePropertyKey);
+		!hasSlnFile(settings);
 }
 
-private boolean isNoScanOptionSet(Settings settings) {
+private boolean isNoScanOptionSet(Configuration settings) {
 	return !settings.hasKey(assemblyPropertyKey) && 
 		!settings.hasKey(projectFilePropertyKey)&& 
-		!settings.hasKey(slnFilePropertyKey);
+		!hasSlnFile(settings);
+}
+
+private boolean hasSlnFile(Configuration settings){
+	return settings.hasKey(slnFilePropertyKey) || (this.alternativeSlnFile != null && this.alternativeSlnFile.length() > 0);
 }
   
-  private void checkMandatoryProperties(Settings settings) {
+  private void checkMandatoryProperties(Configuration settings) {
 	 
 	    if (isNoScanOptionSet(settings)) {
 	      throw new IllegalArgumentException("No FxCop analysis has been performed on this project, whereas it contains " + languageKey() + " files: " +
@@ -190,16 +195,17 @@ private boolean isNoScanOptionSet(Settings settings) {
 	    }
 	  }
 
-  private void checkAssemblyProperty(Settings settings) {
-    String assemblyPath = settings.getString(assemblyPropertyKey);
-
-    if (assemblyPath == null) {
+  private void checkAssemblyProperty(Configuration settings) {
+    Optional<String> assemblyPath = settings.get(assemblyPropertyKey);
+    
+    
+    if (!assemblyPath.isPresent()) {
     	LOG.error("The property '" + assemblyPropertyKey + "' is not set.");
     	throw new IllegalArgumentException("The property '" + assemblyPropertyKey + "' is not set.");
-    } else if (assemblyPath.contains("*")) {
-    	checkWildcardAssemblyPath(assemblyPath);
+    } else if (assemblyPath.get().contains("*")) {
+    	checkWildcardAssemblyPath(assemblyPath.get());
     } else {
-        checkSingleAssemblyPath(assemblyPath);
+        checkSingleAssemblyPath(assemblyPath.get());
     }
   }
 
@@ -262,43 +268,55 @@ private boolean isNoScanOptionSet(Settings settings) {
     return assemblyPath.substring(0, i) + ".pdb";
   }
 
-  private void checkFxCopCmdPathProperty(Settings settings) {
+  private void checkFxCopCmdPathProperty(Configuration settings) {
     if (!settings.hasKey(fxCopCmdPropertyKey) && settings.hasKey(DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY)) {
       fxCopCmdPropertyKey = DEPRECATED_FXCOPCMD_PATH_PROPERTY_KEY;
     }
 
-    String value = settings.getString(fxCopCmdPropertyKey);
-
-    Preconditions.checkArgument(
-    		value != null,
-    	      "FxCopCmd executable is not set \"" + PROVIDED_BY_THE_PROPERTY + fxCopCmdPropertyKey + "\".");
+    Optional<String> value = settings.get(fxCopCmdPropertyKey);
     
-    File file = new File(value);
+    Preconditions.checkArgument(
+    		value.isPresent(),
+    		"FxCopCmd executable is not set \"" + PROVIDED_BY_THE_PROPERTY + fxCopCmdPropertyKey + "\".");
+
+        
+    File file = new File(value.get());
     Preconditions.checkArgument(
       file.isFile(),
       "Cannot find the FxCopCmd executable \"" + file.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + fxCopCmdPropertyKey + "\".");
   }
 
-  private void checkTimeoutProeprty(Settings settings) {
+  private void checkTimeoutProeprty(Configuration settings) {
     if (!settings.hasKey(timeoutPropertyKey) && settings.hasKey(DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY)) {
       timeoutPropertyKey = DEPRECATED_TIMEOUT_MINUTES_PROPERTY_KEY;
     }
   }
 
-  private void checkReportPathProperty(Settings settings) {
-    File file = new File(settings.getString(reportPathPropertyKey));
+  private void checkReportPathProperty(Configuration settings) {
+	  
+	  Optional<String> settingOptional = settings.get(reportPathPropertyKey);
+	  
+	  Preconditions.checkArgument(
+			  settingOptional.isPresent(),
+	      "The FxCop report  \"" + PROVIDED_BY_THE_PROPERTY + reportPathPropertyKey + "\" is not present.");
+	  
+    File file = new File(settingOptional.get());
     Preconditions.checkArgument(
       file.isFile(),
       "Cannot find the FxCop report \"" + file.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + reportPathPropertyKey + "\".");
   }
   
-  private void checkProjectFileProperty(Settings settings) {
+  private void checkProjectFileProperty(Configuration settings) {
 		if (!settings.hasKey(projectFilePropertyKey)){
 			return;
 		}
-	    String projectFilePath = settings.getString(projectFilePropertyKey);
+	    Optional<String> projectFilePath = settings.get(projectFilePropertyKey);
+	    
+	    Preconditions.checkArgument(
+	    		projectFilePath.isPresent(),
+	      "The project file \"" + PROVIDED_BY_THE_PROPERTY + projectFilePropertyKey + "\" is not present.");
 
-	    File assemblyFile = new File(projectFilePath);
+	    File assemblyFile = new File(projectFilePath.get());
 	    Preconditions.checkArgument(
 	      assemblyFile.isFile(),
 	      "Cannot find the project \"" + assemblyFile.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + projectFilePropertyKey + "\".");
@@ -306,10 +324,17 @@ private boolean isNoScanOptionSet(Settings settings) {
 	    
 	  }
   
-  private void checkSlnProperty(Settings settings) {
-	    String slnFilePath = settings.getString(slnFilePropertyKey);
+  private void checkSlnProperty(Configuration settings) {
+	    Optional<String> slnFilePath = settings.get(slnFilePropertyKey);
+	    
+	    if (!slnFilePath.isPresent()) slnFilePath = Optional.of(this.alternativeSlnFile);
+	    
+	    Preconditions.checkArgument(
+	    		slnFilePath.isPresent(),
+	      "The sln file \"" + PROVIDED_BY_THE_PROPERTY + slnFilePropertyKey + "\" is not present.");
 
-	    File slnFile = new File(slnFilePath);
+
+	    File slnFile = new File(slnFilePath.get());
 	    Preconditions.checkArgument(
 	    		slnFile.isFile(),
 	      "Cannot find the sln file \"" + slnFile.getAbsolutePath() + PROVIDED_BY_THE_PROPERTY + slnFilePropertyKey + "\".");
